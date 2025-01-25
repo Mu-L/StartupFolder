@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.lowtechguys.StartupFolder</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/open</string>
+		<string>/Applications/StartupFolder.app</string>
+		<string>--env</string>
+		<string>login=true</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/tmp/com.lowtechguys.StartupFolder.err</string>
+	<key>StandardOutPath</key>
+	<string>/tmp/com.lowtechguys.StartupFolder.out</string>
+</dict>
+</plist>

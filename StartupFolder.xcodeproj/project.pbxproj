@@ -6,14 +6,57 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C7DA8FC22D450B750004A4D7 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = C7DA8FC12D450B750004A4D7 /* WrappingHStack */; };
+		C7F164E92D39516100966B49 /* Lowtech in Frameworks */ = {isa = PBXBuildFile; productRef = C7F164E82D39516100966B49 /* Lowtech */; };
+		C7F164EB2D39516100966B49 /* LowtechIndie in Frameworks */ = {isa = PBXBuildFile; productRef = C7F164EA2D39516100966B49 /* LowtechIndie */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C7F164FC2D39642D00966B49 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = ../Library/LaunchAgents;
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		C7F164D52D3950FB00966B49 /* Startup Folder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Startup Folder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7F164D52D3950FB00966B49 /* StartupFolder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StartupFolder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C7F164FB2D39638600966B49 /* Exceptions for "StartupFolder" folder in "StartupFolder" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				com.lowtechguys.StartupFolder.plist,
+				Info.plist,
+			);
+			target = C7F164D42D3950FB00966B49 /* StartupFolder */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		C7F164FE2D39648B00966B49 /* Exceptions for "StartupFolder" folder in "Copy Files" phase from "StartupFolder" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = C7F164FC2D39642D00966B49 /* CopyFiles */;
+			membershipExceptions = (
+				com.lowtechguys.StartupFolder.plist,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C7F164D72D3950FB00966B49 /* Startup Folder */ = {
+		C7F164D72D3950FB00966B49 /* StartupFolder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Startup Folder";
+			exceptions = (
+				C7F164FB2D39638600966B49 /* Exceptions for "StartupFolder" folder in "StartupFolder" target */,
+				C7F164FE2D39648B00966B49 /* Exceptions for "StartupFolder" folder in "Copy Files" phase from "StartupFolder" target */,
+			);
+			path = StartupFolder;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,16 +66,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7F164E92D39516100966B49 /* Lowtech in Frameworks */,
+				C7DA8FC22D450B750004A4D7 /* WrappingHStack in Frameworks */,
+				C7F164EB2D39516100966B49 /* LowtechIndie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C7DA8FC02D450B750004A4D7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C7F164CC2D3950FB00966B49 = {
 			isa = PBXGroup;
 			children = (
-				C7F164D72D3950FB00966B49 /* Startup Folder */,
+				C7F164D72D3950FB00966B49 /* StartupFolder */,
+				C7DA8FC02D450B750004A4D7 /* Frameworks */,
 				C7F164D62D3950FB00966B49 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +94,7 @@
 		C7F164D62D3950FB00966B49 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C7F164D52D3950FB00966B49 /* Startup Folder.app */,
+				C7F164D52D3950FB00966B49 /* StartupFolder.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,26 +102,30 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C7F164D42D3950FB00966B49 /* Startup Folder */ = {
+		C7F164D42D3950FB00966B49 /* StartupFolder */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C7F164E42D3950FC00966B49 /* Build configuration list for PBXNativeTarget "Startup Folder" */;
+			buildConfigurationList = C7F164E42D3950FC00966B49 /* Build configuration list for PBXNativeTarget "StartupFolder" */;
 			buildPhases = (
 				C7F164D12D3950FB00966B49 /* Sources */,
 				C7F164D22D3950FB00966B49 /* Frameworks */,
 				C7F164D32D3950FB00966B49 /* Resources */,
+				C7F164FC2D39642D00966B49 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C7F164D72D3950FB00966B49 /* Startup Folder */,
+				C7F164D72D3950FB00966B49 /* StartupFolder */,
 			);
-			name = "Startup Folder";
+			name = StartupFolder;
 			packageProductDependencies = (
+				C7F164E82D39516100966B49 /* Lowtech */,
+				C7F164EA2D39516100966B49 /* LowtechIndie */,
+				C7DA8FC12D450B750004A4D7 /* WrappingHStack */,
 			);
 			productName = "Startup Folder";
-			productReference = C7F164D52D3950FB00966B49 /* Startup Folder.app */;
+			productReference = C7F164D52D3950FB00966B49 /* StartupFolder.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +143,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C7F164D02D3950FB00966B49 /* Build configuration list for PBXProject "Startup Folder" */;
+			buildConfigurationList = C7F164D02D3950FB00966B49 /* Build configuration list for PBXProject "StartupFolder" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -94,12 +152,16 @@
 			);
 			mainGroup = C7F164CC2D3950FB00966B49;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */,
+				C7F165052D450AF100966B49 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C7F164D62D3950FB00966B49 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C7F164D42D3950FB00966B49 /* Startup Folder */,
+				C7F164D42D3950FB00966B49 /* StartupFolder */,
 			);
 		};
 /* End PBXProject section */
@@ -248,20 +310,24 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Startup Folder/Startup_Folder.entitlements";
+				CODE_SIGN_ENTITLEMENTS = StartupFolder/StartupFolder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Startup Folder/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"StartupFolder/Preview Content\"";
 				DEVELOPMENT_TEAM = RDDXV84A73;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StartupFolder/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Startup Folder";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lowtechguys.Startup-Folder";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -275,22 +341,26 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "Startup Folder/Startup_Folder.entitlements";
+				CODE_SIGN_ENTITLEMENTS = StartupFolder/StartupFolder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Startup Folder/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"StartupFolder/Preview Content\"";
 				DEVELOPMENT_TEAM = RDDXV84A73;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StartupFolder/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Startup Folder";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.lowtechguys.Startup-Folder";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lowtechguys.StartupFolder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -300,7 +370,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C7F164D02D3950FB00966B49 /* Build configuration list for PBXProject "Startup Folder" */ = {
+		C7F164D02D3950FB00966B49 /* Build configuration list for PBXProject "StartupFolder" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C7F164E22D3950FC00966B49 /* Debug */,
@@ -309,7 +379,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C7F164E42D3950FC00966B49 /* Build configuration list for PBXNativeTarget "Startup Folder" */ = {
+		C7F164E42D3950FC00966B49 /* Build configuration list for PBXNativeTarget "StartupFolder" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C7F164E52D3950FC00966B49 /* Debug */,
@@ -319,6 +389,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FuzzyIdeas/Lowtech";
+			requirement = {
+				branch = ventura;
+				kind = branch;
+			};
+		};
+		C7F165052D450AF100966B49 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ksemianov/WrappingHStack";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C7DA8FC12D450B750004A4D7 /* WrappingHStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7F165052D450AF100966B49 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
+			productName = WrappingHStack;
+		};
+		C7F164E82D39516100966B49 /* Lowtech */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */;
+			productName = Lowtech;
+		};
+		C7F164EA2D39516100966B49 /* LowtechIndie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */;
+			productName = LowtechIndie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C7F164CD2D3950FB00966B49 /* Project object */;
 }
