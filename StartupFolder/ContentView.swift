@@ -180,31 +180,36 @@ struct ContentView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            if startupManager.startupItems.isEmpty {
-                Text("No startup items").fill()
-            } else {
-                itemList
-            }
-            Spacer()
-
-            FooterView().padding(.bottom, 5)
+        NavigationSplitView {
+            SidebarView()
+                .labelStyle(.iconOnly)
         }
-        .scrollContentBackground(.hidden)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Picker("Labels", selection: $labelStyle) {
-                    ForEach(LabelStyleSetting.allCases) { style in
-                        Text(style.text).tag(style)
-                    }
+        detail: {
+            VStack(alignment: .leading) {
+                if startupManager.startupItems.isEmpty {
+                    Text("No startup items").fill()
+                } else {
+                    itemList.labelStyle(labelStyle)
                 }
-                .pickerStyle(.menu)
+                Spacer()
+
+                FooterView().padding(.bottom, 5).labelStyle(labelStyle)
             }
-            ToolbarItem(placement: .primaryAction) {
-                SettingsLink()
+            .scrollContentBackground(.hidden)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Picker("Labels", selection: $labelStyle) {
+                        ForEach(LabelStyleSetting.allCases) { style in
+                            Text(style.text).tag(style)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    SettingsLink().labelStyle(.iconOnly)
+                }
             }
         }
-        .labelStyle(labelStyle)
     }
 }
 

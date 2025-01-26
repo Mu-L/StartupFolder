@@ -23,19 +23,33 @@ class StartupManager {
 
     @ObservationIgnored @Default(.startupFolderPath) var startupFolderPath
 
+    var folders: [FilePath.ComponentView] = []
+
     var startupItems: [StartupItem] = [] {
         didSet {
             categorize()
         }
     }
 
+    var filteredStartupItems: [StartupItem]? {
+        didSet {
+            categorize()
+        }
+    }
+
     func categorize() {
-        appItems = startupItems.filter { $0.type == .app }.sorted { $0.name < $1.name }
-        scriptItems = startupItems.filter { $0.type == .executable && !$0.isBinary }.sorted { $0.name < $1.name }
-        binaryItems = startupItems.filter { $0.type == .executable && $0.isBinary }.sorted { $0.name < $1.name }
-        linkItems = startupItems.filter { $0.type == .webloc }.sorted { $0.name < $1.name }
-        otherItems = startupItems.filter { $0.type == .other }.sorted { $0.name < $1.name }
-        shortcutItems = startupItems.filter { $0.type == .shortcut }.sorted { $0.name < $1.name }
+        folders = startupItems
+            .compactMap(\.folder)
+            .uniqued
+            .sorted(by: \.string)
+
+        let itemsToCategorize = filteredStartupItems ?? startupItems
+        appItems = itemsToCategorize.filter { $0.type == .app }.sorted { $0.name < $1.name }
+        scriptItems = itemsToCategorize.filter { $0.type == .script }.sorted { $0.name < $1.name }
+        binaryItems = itemsToCategorize.filter { $0.type == .binary }.sorted { $0.name < $1.name }
+        linkItems = itemsToCategorize.filter { $0.type == .link }.sorted { $0.name < $1.name }
+        otherItems = itemsToCategorize.filter { $0.type == .other }.sorted { $0.name < $1.name }
+        shortcutItems = itemsToCategorize.filter { $0.type == .shortcut }.sorted { $0.name < $1.name }
     }
 
     func cleanup() {
@@ -48,7 +62,7 @@ class StartupManager {
         }
 
         if onCleanup.contains(.terminateProcesses) {
-            for item in startupItems where item.process != nil && item.type == .executable {
+            for item in startupItems where item.process != nil && item.type != .shortcut {
                 item.process?.terminate()
             }
         }

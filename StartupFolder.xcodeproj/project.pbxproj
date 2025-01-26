@@ -155,6 +155,7 @@
 			packageReferences = (
 				C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */,
 				C7F165052D450AF100966B49 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
+				C7F165053D450AF100966B50 /* XCRemoteSwiftPackageReference "Defaults" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C7F164D62D3950FB00966B49 /* Products */;
@@ -407,6 +408,14 @@
 				minimumVersion = 0.2.0;
 			};
 		};
+		C7F165053D450AF100966B50 /* XCRemoteSwiftPackageReference "Defaults" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Defaults";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -424,6 +433,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */;
 			productName = LowtechIndie;
+		};
+		C7F165054D450AF100966B51 /* Defaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7F165053D450AF100966B50 /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = Defaults;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -175,7 +175,6 @@ struct StartupFolderApp: App {
     var body: some Scene {
         WindowGroup("Startup Folder", id: "main") {
             ContentView()
-                .labelStyle(labelStyle)
                 .frame(minWidth: 800, minHeight: 200)
         }
         .defaultSize(width: 800, height: 600)

@@ -7,6 +7,7 @@
 
 import Foundation
 import Lowtech
+import System
 
 extension URL {
     func containsByte(_ byte: UInt8) -> Bool {
@@ -38,5 +39,15 @@ extension URL {
 
     func isExecutable() -> Bool {
         FileManager.default.isExecutableFile(atPath: path) && !isDir()
+    }
+
+    func isBinary() -> Bool {
+        containsByte(0)
+    }
+}
+
+extension FilePath.ComponentView {
+    var string: String {
+        map(\.string).joined(separator: "/")
     }
 }

@@ -14,7 +14,9 @@ struct StartupItemView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     HStack {
-                        Text(item.shouldShowExtension ? item.name : item.name.ns.deletingPathExtension).font(.headline)
+                        Text(item.shouldShowExtension ? item.name : item.name.ns.deletingPathExtension)
+                            .round(14, weight: .heavy)
+                            .foregroundColor(.fg.warm.opacity(0.9))
                         Button(action: {
                             if item.type == .shortcut, let url = item.shortcut?.url {
                                 NSWorkspace.shared.open(url)
@@ -50,9 +52,10 @@ struct StartupItemView: View {
 
                 if !item.isTrashed {
                     Text(item.status.text)
-                        .foregroundColor(item.status.color)
+                        .roundbg(radius: 8, verticalPadding: 2, horizontalPadding: 8, color: item.status.color.opacity(0.8), noFG: true)
+                        .foregroundStyle(.white)
                 }
-            }
+            }.padding(.bottom, 2)
 
             if item.isTrashed {
                 trashedActions.fixedSize()
@@ -60,7 +63,16 @@ struct StartupItemView: View {
                 actions.fixedSize()
             }
         }
-        .roundbg(radius: 8, verticalPadding: 8, horizontalPadding: 8, color: .translucid, shadowSize: 0, noFG: true)
+//        .onAppear {
+//            if SWIFTUI_PREVIEW {
+//                for (i, status) in StartupItem.ExecutionStatus.allCases.enumerated() {
+//                    mainAsyncAfter(ms: i * 1200) {
+//                        item.status = status
+//                    }
+//                }
+//            }
+//        }
+        .roundbg(radius: 12, verticalPadding: 8, horizontalPadding: 8, color: colorScheme == .dark ? .mauve.opacity(0.1) : .orange.opacity(0.04), shadowSize: 0, noFG: true)
         .sheet(isPresented: $showStdout) {
             outputView(item.readStdout() ?? "", path: item.stdoutFilePath)
         }
@@ -71,6 +83,8 @@ struct StartupItemView: View {
             runtime = durationText()
         }
     }
+
+    @Environment(\.colorScheme) var colorScheme
 
     func outputView(_ text: String, path: FilePath?) -> some View {
         VStack {
@@ -138,7 +152,7 @@ struct StartupItemView: View {
                 }.disabled(item.isTerminating)
             }
 
-            if item.type == .executable {
+            if item.type == .script {
                 Button {
                     NSWorkspace.shared.open([item.url], withApplicationAt: Defaults[.editorApp], configuration: .init())
                 } label: {
@@ -152,7 +166,7 @@ struct StartupItemView: View {
             }
             .foregroundStyle(.red)
 
-            if item.type != .webloc {
+            if item.type != .link {
                 let outSize = item.stdoutFilePath?.fileSize() ?? 0
                 let errSize = item.stderrFilePath?.fileSize() ?? 0
 

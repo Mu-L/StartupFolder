@@ -23,15 +23,33 @@ class StartupItem: Identifiable {
         }
     }
 
-    enum StartupItemType {
+    enum StartupItemType: CaseIterable {
         case app
-        case executable
+        case script
+        case binary
         case other
-        case webloc
+        case link
         case shortcut
+
+        var text: String {
+            switch self {
+            case .app:
+                "App"
+            case .script:
+                "Script"
+            case .binary:
+                "Binary"
+            case .other:
+                "Other"
+            case .link:
+                "Link"
+            case .shortcut:
+                "Shortcut"
+            }
+        }
     }
 
-    enum ExecutionStatus {
+    enum ExecutionStatus: CaseIterable {
         case notStarted
         case running
         case succeeded
@@ -41,7 +59,7 @@ class StartupItem: Identifiable {
         var text: String {
             switch self {
             case .notStarted:
-                "Not Started"
+                "Not started"
             case .running:
                 "Running"
             case .succeeded:
@@ -84,22 +102,6 @@ class StartupItem: Identifiable {
     var app: NSRunningApplication?
     var isTrashed = false
     var shortcut: Shortcut?
-    @ObservationIgnored
-    lazy var canBeEdited: Bool = {
-        guard type == .executable || type == .other else {
-            return false
-        }
-
-        return url.containsByte(0x00)
-    }()
-    @ObservationIgnored
-    lazy var isBinary: Bool = {
-        guard type == .executable else {
-            return false
-        }
-
-        return url.containsByte(0x00)
-    }()
 
     var isTerminating = false
 
@@ -112,7 +114,7 @@ class StartupItem: Identifiable {
 
     var shouldShowExtension: Bool {
         switch type {
-        case .app, .webloc, .shortcut:
+        case .app, .link, .shortcut:
             false
         default:
             true
@@ -130,10 +132,12 @@ class StartupItem: Identifiable {
     static func determineType(of url: URL) -> StartupItemType {
         if url.pathExtension == "app" || (url.resolvingSymlinksInPath()).pathExtension == "app" {
             .app
+        } else if url.isExecutable(), !url.isBinary() {
+            .script
         } else if url.isExecutable() {
-            .executable
+            .binary
         } else if url.pathExtension == "webloc" {
-            .webloc
+            .link
         } else if url.pathExtension == "shortcut" {
             .shortcut
         } else {
@@ -204,9 +208,9 @@ class StartupItem: Identifiable {
         switch type {
         case .app:
             launchApp()
-        case .executable, .shortcut:
+        case .script, .binary, .shortcut:
             launchExecutable()
-        case .webloc, .other:
+        case .link, .other:
             launchWithWorkspace()
         }
     }
