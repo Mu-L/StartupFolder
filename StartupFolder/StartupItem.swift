@@ -6,10 +6,12 @@
 //
 
 import Defaults
+import FaviconFinder
 import Foundation
 import Lowtech
 import SwiftUI
 import System
+import UniformTypeIdentifiers
 
 @Observable
 class StartupItem: Identifiable {
@@ -21,6 +23,22 @@ class StartupItem: Identifiable {
         if type == .shortcut {
             shortcut = extractShortcut(from: url)
         }
+
+        icon = switch type {
+        case .app:
+            NSWorkspace.shared.icon(forFile: url.resolvingSymlinksInPath().path)
+        case .binary:
+            NSWorkspace.shared.icon(forFile: url.resolvingSymlinksInPath().path)
+        case .link:
+            getFavicon(for: siteURL) ?? NSImage(named: NSImage.networkName)!
+        case .script:
+            getLanguageIcon(for: url) ?? NSImage(named: NSImage.actionTemplateName)!
+        case .shortcut:
+            getShortcutIcon(for: shortcut) ?? NSWorkspace.shared.icon(forFile: "/System/Applications/Shortcuts.app")
+        default:
+            NSImage(named: NSImage.actionTemplateName)!
+        }
+
     }
 
     enum StartupItemType: CaseIterable {
@@ -104,6 +122,41 @@ class StartupItem: Identifiable {
     var shortcut: Shortcut?
 
     var isTerminating = false
+
+    var icon: NSImage? = nil
+
+    @ObservationIgnored lazy var utType: UTType? = {
+        if type == .script, url.pathExtension.isEmpty {
+            guard let fileHandle = try? FileHandle(forReadingFrom: url),
+                  let firstLine = String(data: fileHandle.readData(ofLength: 1024), encoding: .utf8)?.components(separatedBy: .newlines).first,
+                  firstLine.hasPrefix("#!")
+            else {
+                return nil
+            }
+            return ScriptRunner(from: firstLine).utType ?? .executable
+        }
+        guard let resourceValues = try? url.resourceValues(forKeys: [.contentTypeKey]),
+              let utType = resourceValues.contentType
+        else {
+            return nil
+        }
+        return utType
+    }()
+
+    @ObservationIgnored lazy var siteURL: URL? = {
+        guard type == .link, let data = try? Data(contentsOf: url),
+              let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
+              let siteURLString = plist["URL"] as? String,
+              let siteURL = URL(string: siteURLString)
+        else {
+            return nil
+        }
+        return siteURL
+    }()
+
+    var isNetLink: Bool {
+        type == .link && (siteURL?.scheme?.starts(with: "http") ?? false)
+    }
 
     var process: Process? {
         didSet {
@@ -360,4 +413,77 @@ class StartupItem: Identifiable {
             ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: identifier)
     }
 
+    private func getLanguageIcon(for url: URL) -> NSImage? {
+        NSWorkspace.shared.icon(for: utType ?? .executable)
+    }
+
+    private func getFavicon(for url: URL?) -> NSImage? {
+        guard let url else {
+            return nil
+        }
+        if let image = FAVICON_CACHE.object(forKey: url as NSURL) {
+            return image
+        }
+
+        Task.init { [weak self] in
+            if let image = await downloadFavicon(for: url) {
+                mainAsync {
+                    FAVICON_CACHE.setObject(image, forKey: url as NSURL)
+                    self?.icon = image
+                }
+            }
+
+        }
+        return nil
+    }
+
+}
+
+let FAVICON_CACHE_DIR = FilePath.dir(
+    FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+        .first?
+        .appendingPathComponent("startup-folder-favicons")
+        .filePath ?? "/tmp/startup-folder-favicons".filePath!
+)
+let FAVICON_CACHE = NSCache<NSURL, NSImage>()
+
+func getShortcutIcon(for shortcut: Shortcut?) -> NSImage? {
+    // Implement logic to fetch shortcut icon
+    nil
+}
+
+func downloadFavicon(for url: URL) async -> NSImage? {
+    guard let domain = url.host else {
+        return nil
+    }
+
+    let cacheFilePath = FAVICON_CACHE_DIR / "\(domain.safeFilename).png"
+    if cacheFilePath.exists, let image = NSImage(contentsOf: cacheFilePath.url) {
+        return image
+    }
+
+    do {
+        let favicon = try await FaviconFinder(url: url)
+            .fetchFaviconURLs()
+            .download()
+            .smallest()
+
+        guard let image = favicon.image?.image else {
+            log.error("Failed to retrieve favicon for \(url)")
+            return nil
+        }
+
+        if let tiff = image.tiffRepresentation, let tiffData = NSBitmapImageRep(data: tiff),
+           let imageData = tiffData.representation(using: .png, properties: [:])
+        {
+            try imageData.write(to: cacheFilePath.url)
+        } else {
+            log.error("Failed to save favicon for \(url)")
+        }
+
+        return image
+    } catch {
+        log.error("Failed to retrieve or save favicon with error: \(String(describing: error))")
+        return nil
+    }
 }

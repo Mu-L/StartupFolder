@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AddScriptView: View {
     @Binding var name: String
@@ -61,6 +62,47 @@ enum ScriptRunner: String, CaseIterable {
     case swift
     case osascript
     case node
+
+    init(from shebang: String) {
+        let path = shebang.replacingOccurrences(of: "#!", with: "").replacingOccurrences(of: "/usr/bin/env ", with: "").trimmingCharacters(in: .whitespaces)
+        self = ScriptRunner.allCases.first { $0.path == path } ?? ScriptRunner.allCases.first { $0.path.contains(path) } ?? .sh
+    }
+
+    var fileExtension: String {
+        switch self {
+        case .sh: "sh"
+        case .zsh: "zsh"
+        case .fish: "fish"
+        case .python3: "py"
+        case .ruby: "rb"
+        case .perl: "pl"
+        case .swift: "swift"
+        case .osascript: "scpt"
+        case .node: "js"
+        }
+    }
+
+    var shebang: String {
+        "#!\(path)"
+    }
+
+    var utType: UTType? {
+        if let utType = UTType(filenameExtension: fileExtension) {
+            return utType
+        }
+
+        switch self {
+        case .sh: return .shellScript
+        case .zsh: return .shellScript
+        case .fish: return .shellScript
+        case .python3: return .pythonScript
+        case .ruby: return .rubyScript
+        case .perl: return .perlScript
+        case .swift: return .swiftSource
+        case .osascript: return .appleScript
+        case .node: return .javaScript
+        }
+    }
 
     var name: String {
         switch self {

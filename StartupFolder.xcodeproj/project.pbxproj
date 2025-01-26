@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C7DA8FC22D450B750004A4D7 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = C7DA8FC12D450B750004A4D7 /* WrappingHStack */; };
+		C7E7FC452D467CA600EE431E /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = C7E7FC442D467CA600EE431E /* FaviconFinder */; };
 		C7F164E92D39516100966B49 /* Lowtech in Frameworks */ = {isa = PBXBuildFile; productRef = C7F164E82D39516100966B49 /* Lowtech */; };
 		C7F164EB2D39516100966B49 /* LowtechIndie in Frameworks */ = {isa = PBXBuildFile; productRef = C7F164EA2D39516100966B49 /* LowtechIndie */; };
 /* End PBXBuildFile section */
@@ -69,6 +70,7 @@
 				C7F164E92D39516100966B49 /* Lowtech in Frameworks */,
 				C7DA8FC22D450B750004A4D7 /* WrappingHStack in Frameworks */,
 				C7F164EB2D39516100966B49 /* LowtechIndie in Frameworks */,
+				C7E7FC452D467CA600EE431E /* FaviconFinder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +125,7 @@
 				C7F164E82D39516100966B49 /* Lowtech */,
 				C7F164EA2D39516100966B49 /* LowtechIndie */,
 				C7DA8FC12D450B750004A4D7 /* WrappingHStack */,
+				C7E7FC442D467CA600EE431E /* FaviconFinder */,
 			);
 			productName = "Startup Folder";
 			productReference = C7F164D52D3950FB00966B49 /* StartupFolder.app */;
@@ -156,6 +159,7 @@
 				C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */,
 				C7F165052D450AF100966B49 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				C7F165053D450AF100966B50 /* XCRemoteSwiftPackageReference "Defaults" */,
+				C7DA8FF82D467BA70004A4D7 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C7F164D62D3950FB00966B49 /* Products */;
@@ -392,6 +396,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		C7DA8FF82D467BA70004A4D7 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/will-lumley/FaviconFinder";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.4;
+			};
+		};
 		C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/FuzzyIdeas/Lowtech";
@@ -424,6 +436,11 @@
 			package = C7F165052D450AF100966B49 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
 			productName = WrappingHStack;
 		};
+		C7E7FC442D467CA600EE431E /* FaviconFinder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7DA8FF82D467BA70004A4D7 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
+			productName = FaviconFinder;
+		};
 		C7F164E82D39516100966B49 /* Lowtech */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */;
@@ -433,11 +450,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C7F164E72D39516100966B49 /* XCRemoteSwiftPackageReference "Lowtech" */;
 			productName = LowtechIndie;
-		};
-		C7F165054D450AF100966B51 /* Defaults */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C7F165053D450AF100966B50 /* XCRemoteSwiftPackageReference "Defaults" */;
-			productName = Defaults;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

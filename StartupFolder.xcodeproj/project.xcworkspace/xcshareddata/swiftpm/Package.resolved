@@ -1,5 +1,5 @@
 {
-  "originHash" : "672e4ae7e270be73e7b71ba03693c4c06a18afb291f50e75a213fb85fc790f17",
+  "originHash" : "d0b6f522dc2dd00c659e6b89b35a4d965397e190e72da233f58feb28224f48b2",
   "pins" : [
     {
       "identity" : "appreceiptvalidator",
@@ -35,6 +35,15 @@
       "state" : {
         "revision" : "d9beca13ca85baa50ee29832d0db5129fba69630",
         "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "faviconfinder",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/will-lumley/FaviconFinder",
+      "state" : {
+        "revision" : "9279f4371f4877ca302ba3bf1015f3f58ae4a56c",
+        "version" : "5.1.4"
       }
     },
     {
@@ -143,6 +152,15 @@
       "state" : {
         "revision" : "5d943224c3bb173e6ecf27295611615eba90c80e",
         "version" : "7.0.0"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "6b4930da67b462d3f200472c902dd016d37a554d",
+        "version" : "2.7.7"
       }
     },
     {
