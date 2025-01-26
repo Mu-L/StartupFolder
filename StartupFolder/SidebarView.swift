@@ -15,7 +15,7 @@ struct SidebarView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             Button(action: resetFilters) {
                 Text("Reset Filters")
             }.disabled(selectedStatuses.isEmpty && selectedFolders.isEmpty && selectedTypes.isEmpty)
@@ -25,7 +25,7 @@ struct SidebarView: View {
                 .padding(.top)
             List(selection: $selectedStatuses) {
                 Text("All").tag(StartupItem.ExecutionStatus?.none).bold()
-                ForEach(StartupItem.ExecutionStatus.allCases, id: \.self) { status in
+                ForEach(StartupItem.ExecutionStatus.allCases.sorted(using: KeyPathComparator(\.text)), id: \.self) { status in
                     Text(status.text).tag(status as StartupItem.ExecutionStatus?)
                 }
             }
@@ -40,7 +40,7 @@ struct SidebarView: View {
                 .padding(.top)
             List(selection: $selectedTypes) {
                 Text("All").tag(StartupItem.StartupItemType?.none).bold()
-                ForEach(StartupItem.StartupItemType.allCases, id: \.self) { type in
+                ForEach(StartupItem.StartupItemType.allCases.sorted(using: KeyPathComparator(\.text)), id: \.self) { type in
                     Text(type.text).tag(type as StartupItem.StartupItemType?)
                 }
             }

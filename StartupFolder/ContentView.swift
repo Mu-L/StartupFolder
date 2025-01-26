@@ -131,6 +131,7 @@ struct ContentView: View {
                 Section(header: Text("Apps")) {
                     ForEach(startupManager.appItems) { item in
                         StartupItemView(item: item)
+
                     }
                 }
             }
@@ -176,7 +177,7 @@ struct ContentView: View {
                     }
                 }
             }
-        }.listStyle(.sidebar)
+        }.listStyle(.inset)
     }
 
     var body: some View {
@@ -186,7 +187,7 @@ struct ContentView: View {
         }
         detail: {
             VStack(alignment: .leading) {
-                if startupManager.startupItems.isEmpty {
+                if (startupManager.filteredStartupItems ?? startupManager.startupItems).isEmpty {
                     Text("No startup items").fill()
                 } else {
                     itemList.labelStyle(labelStyle)

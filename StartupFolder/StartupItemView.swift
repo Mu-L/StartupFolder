@@ -63,16 +63,7 @@ struct StartupItemView: View {
                 actions.fixedSize()
             }
         }
-//        .onAppear {
-//            if SWIFTUI_PREVIEW {
-//                for (i, status) in StartupItem.ExecutionStatus.allCases.enumerated() {
-//                    mainAsyncAfter(ms: i * 1200) {
-//                        item.status = status
-//                    }
-//                }
-//            }
-//        }
-        .roundbg(radius: 12, verticalPadding: 8, horizontalPadding: 8, color: colorScheme == .dark ? .mauve.opacity(0.1) : .orange.opacity(0.04), shadowSize: 0, noFG: true)
+        .padding(2)
         .sheet(isPresented: $showStdout) {
             outputView(item.readStdout() ?? "", path: item.stdoutFilePath)
         }
