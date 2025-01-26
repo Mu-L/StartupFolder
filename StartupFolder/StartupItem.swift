@@ -17,6 +17,9 @@ class StartupItem: Identifiable {
         self.url = url
         name = url.lastPathComponent
         type = StartupItem.determineType(of: url)
+        if type == .shortcut {
+            shortcut = extractShortcut(from: url)
+        }
     }
 
     enum StartupItemType {
@@ -24,6 +27,7 @@ class StartupItem: Identifiable {
         case executable
         case other
         case webloc
+        case shortcut
     }
 
     enum ExecutionStatus {
@@ -76,6 +80,7 @@ class StartupItem: Identifiable {
     var endTime: Date?
     var app: NSRunningApplication?
     var isTrashed = false
+    var shortcut: Shortcut?
     @ObservationIgnored
     lazy var canBeEdited: Bool = {
         guard type == .executable || type == .other else {
@@ -104,7 +109,7 @@ class StartupItem: Identifiable {
 
     var shouldShowExtension: Bool {
         switch type {
-        case .app, .webloc:
+        case .app, .webloc, .shortcut:
             false
         default:
             true
@@ -126,6 +131,8 @@ class StartupItem: Identifiable {
             .executable
         } else if url.pathExtension == "webloc" {
             .webloc
+        } else if url.pathExtension == "shortcut" {
+            .shortcut
         } else {
             .other
         }
@@ -194,7 +201,7 @@ class StartupItem: Identifiable {
         switch type {
         case .app:
             launchApp()
-        case .executable:
+        case .executable, .shortcut:
             launchExecutable()
         case .webloc, .other:
             launchWithWorkspace()
@@ -287,6 +294,7 @@ class StartupItem: Identifiable {
             mainAsync {
                 if let error {
                     self.status = .failed
+                    log.error("Failed to open app \(self.url): \(error)")
                     return
                 }
                 guard let app else {
@@ -301,13 +309,23 @@ class StartupItem: Identifiable {
     }
 
     private func launchExecutable() {
-        status = .running
-        startTime = Date()
-        process = shellProc(url.path, args: [])
+        if type == .shortcut {
+            guard let shortcut else {
+                log.error("Failed to extract shortcut from \(url)")
+                return
+            }
+            process = shellProc("/usr/bin/shortcuts", args: ["run", shortcut.identifier])
+        } else {
+            process = shellProc(url.path, args: [])
+        }
         guard let process else {
             status = .failed
+            log.error("Failed to launch process for \(url)")
             return
         }
+
+        status = .running
+        startTime = Date()
 
         process.terminationHandler = { [weak self] proc in
             mainAsync {
@@ -325,6 +343,14 @@ class StartupItem: Identifiable {
 
     private func launchWithWorkspace() {
         status = NSWorkspace.shared.open(url) ? .succeeded : .failed
+    }
+
+    private func extractShortcut(from url: URL) -> Shortcut? {
+        guard let identifier = try? String(contentsOf: url).trimmed else {
+            return nil
+        }
+        return SHM.shortcutsMap?.values.joined().first { $0.identifier == identifier }
+            ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: identifier)
     }
 
 }

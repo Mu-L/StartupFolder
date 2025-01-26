@@ -10,87 +10,6 @@ import Defaults
 import Lowtech
 import SwiftUI
 
-struct AddURLView: View {
-    @Binding var url: String
-    @Binding var name: String
-
-    var body: some View {
-        VStack {
-            TextField("URL", text: $url)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .onSubmit {
-                    dismiss()
-                }
-            TextField("Name", text: $name)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .onSubmit {
-                    dismiss()
-                }
-            HStack {
-                Button {
-                    url = ""
-                    name = ""
-                    dismiss()
-                } label: {
-                    Label("Cancel", systemImage: "xmark.circle")
-                }
-                Button {
-                    dismiss()
-                } label: {
-                    Label("Save", systemImage: "checkmark.circle")
-                }
-            }
-        }
-        .onExitCommand {
-            url = ""
-            name = ""
-            dismiss()
-        }
-        .padding()
-    }
-
-    @Environment(\.dismiss) private var dismiss
-
-}
-
-struct AddScriptView: View {
-    @Binding var name: String
-
-    var body: some View {
-        VStack {
-            TextField("Name", text: $name)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .onSubmit {
-                    dismiss()
-                }
-            HStack {
-                Button {
-                    name = ""
-                    dismiss()
-                } label: {
-                    Label("Cancel", systemImage: "xmark.circle")
-                }
-                Button {
-                    dismiss()
-                } label: {
-                    Label("Save", systemImage: "checkmark.circle")
-                }
-            }
-        }
-        .onExitCommand {
-            name = ""
-            dismiss()
-        }
-        .padding()
-    }
-
-    @Environment(\.dismiss) private var dismiss
-
-}
-
 struct FooterView: View {
     @State var startupManager = SM
 
@@ -132,13 +51,22 @@ struct FooterView: View {
             } label: {
                 Label("Add Script", systemImage: "apple.terminal")
             }
+
+            Button {
+                showAddShortcut = true
+            } label: {
+                Label("Add Shortcut", systemImage: "bolt.fill")
+            }
         }
         .padding(.horizontal)
         .sheet(isPresented: $showAddURL, onDismiss: addURL) {
             AddURLView(url: $url, name: $name)
         }
         .sheet(isPresented: $showAddScript, onDismiss: addScript) {
-            AddScriptView(name: $name)
+            AddScriptView(name: $name, selectedRunner: $selectedRunner)
+        }
+        .sheet(isPresented: $showAddShortcut, onDismiss: addShortcut) {
+            AddShortcutView(selectedShortcut: $selectedShortcut)
         }
     }
 
@@ -148,7 +76,8 @@ struct FooterView: View {
         }
 
         let scriptURL = startupManager.startupFolderURL.appendingPathComponent(name.safeFilename)
-        FileManager.default.createFile(atPath: scriptURL.path, contents: nil, attributes: [.posixPermissions: 0o755])
+        let shebang = selectedRunner == nil ? "" : "#!\(selectedRunner!.path)\n"
+        FileManager.default.createFile(atPath: scriptURL.path, contents: shebang.data(using: .utf8), attributes: [.posixPermissions: 0o755])
         NSWorkspace.shared.open([scriptURL], withApplicationAt: Defaults[.editorApp], configuration: NSWorkspace.OpenConfiguration())
         startupManager.loadStartupItems()
     }
@@ -171,10 +100,24 @@ struct FooterView: View {
         startupManager.loadStartupItems()
     }
 
+    func addShortcut() {
+        guard let shortcut = selectedShortcut else {
+            return
+        }
+        let shortcutURL = startupManager.startupFolderURL.appendingPathComponent(shortcut.name.safeFilename + ".shortcut")
+        let content = "\(shortcut.identifier)"
+        try? content.write(to: shortcutURL, atomically: true, encoding: .utf8)
+        startupManager.loadStartupItems()
+    }
+
+    @State private var showAddShortcut = false
+    @State private var selectedShortcut: Shortcut?
+
     @State private var showAddURL = false
     @State private var showAddScript = false
     @State private var url = ""
     @State private var name = ""
+    @State private var selectedRunner: ScriptRunner? = .sh
 
 }
 
@@ -226,6 +169,13 @@ struct ContentView: View {
                     }
                 }
             }
+            if !startupManager.shortcutItems.isEmpty {
+                Section(header: Text("Shortcuts")) {
+                    ForEach(startupManager.shortcutItems) { item in
+                        StartupItemView(item: item)
+                    }
+                }
+            }
         }.listStyle(.sidebar)
     }
 
@@ -256,7 +206,6 @@ struct ContentView: View {
         }
         .labelStyle(labelStyle)
     }
-
 }
 
 #Preview {

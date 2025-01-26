@@ -19,6 +19,7 @@ class StartupManager {
     var binaryItems: [StartupItem] = []
     var linkItems: [StartupItem] = []
     var otherItems: [StartupItem] = []
+    var shortcutItems: [StartupItem] = []
 
     var startupFolderURL: URL {
         startupFolderPath
@@ -31,6 +32,7 @@ class StartupManager {
             binaryItems = startupItems.filter { $0.type == .executable && $0.isBinary }
             linkItems = startupItems.filter { $0.type == .webloc }
             otherItems = startupItems.filter { $0.type == .other }
+            shortcutItems = startupItems.filter { $0.type == .shortcut }
         }
     }
 

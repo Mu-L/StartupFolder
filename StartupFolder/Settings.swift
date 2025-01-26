@@ -45,4 +45,5 @@ extension View {
 extension Defaults.Keys {
     static let editorApp = Key<URL>("editorApp", default: URL(fileURLWithPath: "/System/Applications/TextEdit.app"))
     static let labelStyle = Key<LabelStyleSetting>("labelStyle", default: .titleOnly)
+    static let startupFolderPath = Key<URL>("startupFolderPath", default: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Startup"))
 }

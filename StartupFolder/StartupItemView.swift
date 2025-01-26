@@ -15,7 +15,13 @@ struct StartupItemView: View {
                 VStack(alignment: .leading) {
                     HStack {
                         Text(item.shouldShowExtension ? item.name : item.name.ns.deletingPathExtension).font(.headline)
-                        Button(action: { NSWorkspace.shared.activateFileViewerSelecting([item.url]) }) {
+                        Button(action: {
+                            if item.type == .shortcut, let url = item.shortcut?.url {
+                                NSWorkspace.shared.open(url)
+                            } else {
+                                NSWorkspace.shared.activateFileViewerSelecting([item.url])
+                            }
+                        }) {
                             Image(systemName: "arrow.up.right.square")
                         }
                         .buttonStyle(PlainButtonStyle())
