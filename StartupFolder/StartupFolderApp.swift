@@ -50,6 +50,9 @@ class AppDelegate: LowtechIndieAppDelegate {
             mainWindow?.close()
             SM.launchStartupItems()
         }
+        if !SWIFTUI_PREVIEW {
+            startShortcutWatcher()
+        }
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(applicationDidTerminate(_:)), name: NSWorkspace.didTerminateApplicationNotification, object: nil)
         NSWorkspace.shared.addObserver(self, forKeyPath: #keyPath(NSWorkspace.runningApplications), options: [.new, .old], context: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(windowDidBecomeMain(_:)), name: NSWindow.didBecomeMainNotification, object: nil)

@@ -13,13 +13,16 @@ import System
 
 @Observable
 class StartupManager {
-    let startupFolderURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Startup")
     var recentlyDeletedStartupItems: [StartupItem] = []
     var appItems: [StartupItem] = []
     var scriptItems: [StartupItem] = []
     var binaryItems: [StartupItem] = []
     var linkItems: [StartupItem] = []
     var otherItems: [StartupItem] = []
+
+    var startupFolderURL: URL {
+        startupFolderPath
+    }
 
     var startupItems: [StartupItem] = [] {
         didSet {
@@ -89,6 +92,9 @@ class StartupManager {
             item.launch()
         }
     }
+
+    @ObservationIgnored @Default(.startupFolderPath) private var startupFolderPath
+
 }
 
 let SM = StartupManager()
