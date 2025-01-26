@@ -16,9 +16,9 @@ struct StartupItemView: View {
                     HStack {
                         Image(nsImage: item.icon ?? NSImage(named: NSImage.actionTemplateName)!)
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .aspectRatio(contentMode: .fill)
                             .frame(width: 14, height: 14)
-                            .roundbg(radius: 4, verticalPadding: 1, horizontalPadding: 1, color: .white.opacity(item.isNetLink ? 1 : 0))
+                            .roundbg(radius: 4, verticalPadding: 1, horizontalPadding: 1, color: .primary.opacity(item.isNetLink ? 1 : 0.2))
                         Text(item.shouldShowExtension ? item.name : item.name.ns.deletingPathExtension)
                             .round(14, weight: .heavy)
                             .foregroundColor(.fg.warm.opacity(0.9))

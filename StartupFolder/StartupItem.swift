@@ -13,6 +13,12 @@ import SwiftUI
 import System
 import UniformTypeIdentifiers
 
+extension URL {
+    var resolvingAliasOrSymlink: URL {
+        (try? URL(resolvingAliasFileAt: self)) ?? resolvingSymlinksInPath()
+    }
+}
+
 @Observable
 class StartupItem: Identifiable {
     init(url: URL, folder: FilePath.ComponentView? = nil) {
@@ -26,15 +32,15 @@ class StartupItem: Identifiable {
 
         icon = switch type {
         case .app:
-            NSWorkspace.shared.icon(forFile: url.resolvingSymlinksInPath().path)
+            NSWorkspace.shared.icon(forFile: url.resolvingAliasOrSymlink.path)
         case .binary:
-            NSWorkspace.shared.icon(forFile: url.resolvingSymlinksInPath().path)
+            NSWorkspace.shared.icon(forFile: url.resolvingAliasOrSymlink.path)
         case .link:
             getFavicon(for: siteURL) ?? NSImage(named: NSImage.networkName)!
         case .script:
             getLanguageIcon(for: url) ?? NSImage(named: NSImage.actionTemplateName)!
         case .shortcut:
-            getShortcutIcon(for: shortcut) ?? NSWorkspace.shared.icon(forFile: "/System/Applications/Shortcuts.app")
+            SHORTCUT_ICON
         default:
             NSImage(named: NSImage.actionTemplateName)!
         }
@@ -183,7 +189,7 @@ class StartupItem: Identifiable {
     }
 
     static func determineType(of url: URL) -> StartupItemType {
-        if url.pathExtension == "app" || (url.resolvingSymlinksInPath()).pathExtension == "app" {
+        if url.pathExtension == "app" || (url.resolvingAliasOrSymlink).pathExtension == "app" {
             .app
         } else if url.isExecutable(), !url.isBinary() {
             .script
@@ -425,6 +431,15 @@ class StartupItem: Identifiable {
             return image
         }
 
+        guard url.scheme?.starts(with: "http") ?? false else {
+            if let appURL = LSCopyDefaultApplicationURLForURL(url as CFURL, .all, nil)?.takeRetainedValue() as URL? {
+                let appIcon = NSWorkspace.shared.icon(forFile: appURL.path)
+                FAVICON_CACHE.setObject(appIcon, forKey: url as NSURL)
+                return appIcon
+            }
+            return nil
+        }
+
         Task.init { [weak self] in
             if let image = await downloadFavicon(for: url) {
                 mainAsync {
@@ -439,6 +454,7 @@ class StartupItem: Identifiable {
 
 }
 
+let SHORTCUT_ICON = NSWorkspace.shared.icon(forFile: "/System/Applications/Shortcuts.app")
 let FAVICON_CACHE_DIR = FilePath.dir(
     FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         .first?
@@ -446,11 +462,6 @@ let FAVICON_CACHE_DIR = FilePath.dir(
         .filePath ?? "/tmp/startup-folder-favicons".filePath!
 )
 let FAVICON_CACHE = NSCache<NSURL, NSImage>()
-
-func getShortcutIcon(for shortcut: Shortcut?) -> NSImage? {
-    // Implement logic to fetch shortcut icon
-    nil
-}
 
 func downloadFavicon(for url: URL) async -> NSImage? {
     guard let domain = url.host else {
