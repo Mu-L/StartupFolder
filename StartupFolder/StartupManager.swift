@@ -37,9 +37,26 @@ class StartupManager {
     }
 
     func cleanup() {
-        for item in startupItems where item.process != nil {
-            item.process?.terminate()
+        let onCleanup = Defaults[.onCleanup]
+
+        if onCleanup.contains(.quitApps) {
+            for item in startupItems where item.app != nil {
+                item.app?.terminate()
+            }
         }
+
+        if onCleanup.contains(.terminateProcesses) {
+            for item in startupItems where item.process != nil && item.type == .executable {
+                item.process?.terminate()
+            }
+        }
+
+        if onCleanup.contains(.stopShortcuts) {
+            for item in startupItems where item.type == .shortcut {
+                item.process?.terminate()
+            }
+        }
+
     }
     func watchStartupFolder() {
         do {

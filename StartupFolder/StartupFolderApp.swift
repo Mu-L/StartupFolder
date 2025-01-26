@@ -201,7 +201,9 @@ struct StartupFolderApp: App {
         Settings {
             SettingsView()
                 .frame(minWidth: 600, minHeight: 200)
-        }.defaultSize(width: 600, height: 400)
+        }
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 600, height: 500)
     }
 
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate

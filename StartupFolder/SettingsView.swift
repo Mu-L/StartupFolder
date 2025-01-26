@@ -15,7 +15,7 @@ struct SettingsView: View {
             HStack {
                 (
                     Text("Code editor")
-                        + Text("\nUsed for opening scripts and other editable files")
+                        + Text("\nUsed for editing scripts")
                         .round(11, weight: .regular).foregroundColor(.secondary)
                 ).fixedSize()
                 Spacer()
@@ -36,6 +36,20 @@ struct SettingsView: View {
                 }.truncationMode(.middle)
             }
             .padding()
+            Section(header: Text("On quit")) {
+                ForEach(CleanupBehavior.allCases) { behavior in
+                    Toggle(behavior.text, isOn: Binding(
+                        get: { onCleanup.contains(behavior) },
+                        set: { isOn in
+                            if isOn {
+                                onCleanup.append(behavior)
+                            } else {
+                                onCleanup.removeAll { $0 == behavior }
+                            }
+                        }
+                    ))
+                }
+            }
         }
         .formStyle(.grouped)
         .padding()
@@ -50,6 +64,7 @@ struct SettingsView: View {
 
     @Default(.editorApp) private var editorApp
     @Default(.startupFolderPath) private var startupFolderPath
+    @Default(.onCleanup) private var onCleanup
 
     private func selectEditorApp() {
         let panel = NSOpenPanel()

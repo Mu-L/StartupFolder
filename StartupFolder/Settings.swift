@@ -28,6 +28,25 @@ enum LabelStyleSetting: String, CaseIterable, Identifiable, Defaults.Serializabl
     }
 }
 
+enum CleanupBehavior: String, CaseIterable, Identifiable, Defaults.Serializable {
+    case quitApps
+    case terminateProcesses
+    case stopShortcuts
+
+    var id: String { rawValue }
+
+    var text: String {
+        switch self {
+        case .quitApps:
+            "Quit Apps"
+        case .terminateProcesses:
+            "Terminate Processes"
+        case .stopShortcuts:
+            "Stop Shortcuts"
+        }
+    }
+}
+
 extension View {
     @ViewBuilder
     func labelStyle(_ style: LabelStyleSetting) -> some View {
@@ -46,4 +65,5 @@ extension Defaults.Keys {
     static let editorApp = Key<URL>("editorApp", default: URL(fileURLWithPath: "/System/Applications/TextEdit.app"))
     static let labelStyle = Key<LabelStyleSetting>("labelStyle", default: .titleOnly)
     static let startupFolderPath = Key<URL>("startupFolderPath", default: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Startup"))
+    static let onCleanup = Key<[CleanupBehavior]>("onCleanup", default: [])
 }
