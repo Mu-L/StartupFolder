@@ -26,7 +26,7 @@ struct SettingsView: View {
             .padding()
             HStack {
                 (
-                    Text("Startup Folder Path")
+                    Text("Startup folder path")
                         + Text("\nPath where startup items are stored")
                         .round(11, weight: .regular).foregroundColor(.secondary)
                 ).fixedSize()
@@ -34,6 +34,30 @@ struct SettingsView: View {
                 Button(startupFolderPath.path.shellString) {
                     selectStartupFolderPath()
                 }.truncationMode(.middle)
+            }
+            .padding()
+            HStack {
+                (
+                    Text("Startup delay")
+                        + Text("\nDelay in seconds before running startup items")
+                        .round(11, weight: .regular).foregroundColor(.secondary)
+                ).fixedSize()
+                Spacer()
+                TextField("", value: $startupDelay, formatter: NumberFormatter())
+                    .frame(width: 100)
+                    .textFieldStyle(.roundedBorder)
+            }
+            .padding()
+            HStack {
+                (
+                    Text("Delay between items")
+                        + Text("\nWait this many seconds between running each startup item")
+                        .round(11, weight: .regular).foregroundColor(.secondary)
+                ).fixedSize()
+                Spacer()
+                TextField("", value: $delayBetweenItems, formatter: NumberFormatter())
+                    .frame(width: 100)
+                    .textFieldStyle(.roundedBorder)
             }
             .padding()
             Section(header: Text("On quit")) {
@@ -65,6 +89,8 @@ struct SettingsView: View {
     @Default(.editorApp) private var editorApp
     @Default(.startupFolderPath) private var startupFolderPath
     @Default(.onCleanup) private var onCleanup
+    @Default(.startupDelay) private var startupDelay
+    @Default(.delayBetweenItems) private var delayBetweenItems
 
     private func selectEditorApp() {
         let panel = NSOpenPanel()

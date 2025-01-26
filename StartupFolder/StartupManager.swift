@@ -22,7 +22,6 @@ class StartupManager {
     var shortcutItems: [StartupItem] = []
 
     @ObservationIgnored @Default(.startupFolderPath) var startupFolderPath
-
     var folders: [FilePath.ComponentView] = []
 
     var startupItems: [StartupItem] = [] {
@@ -144,8 +143,30 @@ class StartupManager {
     }
 
     func launchStartupItems() {
-        for item in startupItems {
-            item.launch()
+        if startupDelay > 0 {
+            mainAsyncAfter(startupDelay) {
+                self.runStartupItemsWithDelay()
+            }
+        } else {
+            runStartupItemsWithDelay()
+        }
+    }
+
+    @ObservationIgnored @Default(.startupDelay) private var startupDelay
+    @ObservationIgnored @Default(.delayBetweenItems) private var delayBetweenItems
+
+    private func runStartupItemsWithDelay() {
+        guard delayBetweenItems > 0 else {
+            for item in startupItems.sorted(by: \.name) {
+                item.launch()
+            }
+            return
+        }
+
+        for (index, item) in startupItems.sorted(by: \.name).enumerated() {
+            mainAsyncAfter(delayBetweenItems * index.d) {
+                item.launch()
+            }
         }
     }
 

@@ -66,4 +66,6 @@ extension Defaults.Keys {
     static let labelStyle = Key<LabelStyleSetting>("labelStyle", default: .titleOnly)
     static let startupFolderPath = Key<URL>("startupFolderPath", default: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Startup"))
     static let onCleanup = Key<[CleanupBehavior]>("onCleanup", default: [])
+    static let startupDelay = Key<Double>("startupDelay", default: 0)
+    static let delayBetweenItems = Key<Double>("delayBetweenItems", default: 0)
 }
