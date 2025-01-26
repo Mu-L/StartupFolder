@@ -16,7 +16,7 @@ struct FooterView: View {
     var body: some View {
         HStack {
             Button {
-                NSWorkspace.shared.open(startupManager.startupFolderURL)
+                NSWorkspace.shared.open(startupManager.startupFolderPath)
             } label: {
                 Label("Open Startup Folder", systemImage: "folder.fill")
             }
@@ -32,7 +32,7 @@ struct FooterView: View {
                     return
                 }
                 for url in dialog.urls {
-                    let destinationURL = startupManager.startupFolderURL.appendingPathComponent(url.lastPathComponent)
+                    let destinationURL = startupManager.startupFolderPath.appendingPathComponent(url.lastPathComponent)
                     try? FileManager.default.createSymbolicLink(at: destinationURL, withDestinationURL: url)
                 }
                 startupManager.loadStartupItems()
@@ -75,7 +75,7 @@ struct FooterView: View {
             return
         }
 
-        let scriptURL = startupManager.startupFolderURL.appendingPathComponent(name.safeFilename)
+        let scriptURL = startupManager.startupFolderPath.appendingPathComponent(name.safeFilename)
         let shebang = selectedRunner == nil ? "" : "#!\(selectedRunner!.path)\n"
         FileManager.default.createFile(atPath: scriptURL.path, contents: shebang.data(using: .utf8), attributes: [.posixPermissions: 0o755])
         NSWorkspace.shared.open([scriptURL], withApplicationAt: Defaults[.editorApp], configuration: NSWorkspace.OpenConfiguration())
@@ -95,7 +95,7 @@ struct FooterView: View {
         </dict>
         </plist>
         """
-        let weblocURL = startupManager.startupFolderURL.appendingPathComponent((name.safeFilename ?! url.absoluteString.safeFilename) + ".webloc")
+        let weblocURL = startupManager.startupFolderPath.appendingPathComponent((name.safeFilename ?! url.absoluteString.safeFilename) + ".webloc")
         try? weblocContent.write(to: weblocURL, atomically: true, encoding: .utf8)
         startupManager.loadStartupItems()
     }
@@ -104,7 +104,7 @@ struct FooterView: View {
         guard let shortcut = selectedShortcut else {
             return
         }
-        let shortcutURL = startupManager.startupFolderURL.appendingPathComponent(shortcut.name.safeFilename + ".shortcut")
+        let shortcutURL = startupManager.startupFolderPath.appendingPathComponent(shortcut.name.safeFilename + ".shortcut")
         let content = "\(shortcut.identifier)"
         try? content.write(to: shortcutURL, atomically: true, encoding: .utf8)
         startupManager.loadStartupItems()
@@ -193,15 +193,15 @@ struct ContentView: View {
         .scrollContentBackground(.hidden)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Label Style").font(.caption).foregroundColor(.secondary).offset(x: 4)
-                    Picker("Label Style", selection: $labelStyle) {
-                        ForEach(LabelStyleSetting.allCases) { style in
-                            Text(style.text).tag(style)
-                        }
+                Picker("Labels", selection: $labelStyle) {
+                    ForEach(LabelStyleSetting.allCases) { style in
+                        Text(style.text).tag(style)
                     }
-                    .pickerStyle(.menu)
                 }
+                .pickerStyle(.menu)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                SettingsLink()
             }
         }
         .labelStyle(labelStyle)

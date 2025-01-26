@@ -13,8 +13,9 @@ import System
 
 @Observable
 class StartupItem: Identifiable {
-    init(url: URL) {
+    init(url: URL, folder: FilePath.ComponentView? = nil) {
         self.url = url
+        self.folder = folder
         name = url.lastPathComponent
         type = StartupItem.determineType(of: url)
         if type == .shortcut {
@@ -67,6 +68,8 @@ class StartupItem: Identifiable {
             }
         }
     }
+
+    var folder: FilePath.ComponentView?
 
     var stdoutFilePath: FilePath? = nil
     var stderrFilePath: FilePath? = nil
@@ -179,7 +182,7 @@ class StartupItem: Identifiable {
         }
 
         do {
-            try FileManager.default.moveItem(at: url, to: SM.startupFolderURL.appendingPathComponent(name))
+            try FileManager.default.moveItem(at: url, to: SM.startupFolderPath.appendingPathComponent(name))
         } catch {
             log.error("Failed to put back \(url): \(error)")
             return

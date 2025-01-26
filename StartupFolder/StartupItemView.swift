@@ -25,6 +25,10 @@ struct StartupItemView: View {
                             Image(systemName: "arrow.up.right.square")
                         }
                         .buttonStyle(PlainButtonStyle())
+
+                        if let folder = item.folder {
+                            Text("(in \(folder.map(\.string).joined(separator: "/")))").mono(9).foregroundStyle(.secondary)
+                        }
                     }
                     if !item.isTrashed {
                         HStack {

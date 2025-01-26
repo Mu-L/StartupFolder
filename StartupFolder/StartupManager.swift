@@ -21,19 +21,21 @@ class StartupManager {
     var otherItems: [StartupItem] = []
     var shortcutItems: [StartupItem] = []
 
-    var startupFolderURL: URL {
-        startupFolderPath
-    }
+    @ObservationIgnored @Default(.startupFolderPath) var startupFolderPath
 
     var startupItems: [StartupItem] = [] {
         didSet {
-            appItems = startupItems.filter { $0.type == .app }
-            scriptItems = startupItems.filter { $0.type == .executable && !$0.isBinary }
-            binaryItems = startupItems.filter { $0.type == .executable && $0.isBinary }
-            linkItems = startupItems.filter { $0.type == .webloc }
-            otherItems = startupItems.filter { $0.type == .other }
-            shortcutItems = startupItems.filter { $0.type == .shortcut }
+            categorize()
         }
+    }
+
+    func categorize() {
+        appItems = startupItems.filter { $0.type == .app }.sorted { $0.name < $1.name }
+        scriptItems = startupItems.filter { $0.type == .executable && !$0.isBinary }.sorted { $0.name < $1.name }
+        binaryItems = startupItems.filter { $0.type == .executable && $0.isBinary }.sorted { $0.name < $1.name }
+        linkItems = startupItems.filter { $0.type == .webloc }.sorted { $0.name < $1.name }
+        otherItems = startupItems.filter { $0.type == .other }.sorted { $0.name < $1.name }
+        shortcutItems = startupItems.filter { $0.type == .shortcut }.sorted { $0.name < $1.name }
     }
 
     func cleanup() {
@@ -60,7 +62,7 @@ class StartupManager {
     }
     func watchStartupFolder() {
         do {
-            try LowtechFSEvents.startWatching(paths: [startupFolderURL.path], for: ObjectIdentifier(self), latency: 3) { event in
+            try LowtechFSEvents.startWatching(paths: [startupFolderPath.path], for: ObjectIdentifier(self), latency: 3) { event in
                 guard let flags = event.flag, flags.hasElements(from: [.itemCreated, .itemRemoved, .itemRenamed, .itemModified]) else {
                     return
                 }
@@ -74,10 +76,10 @@ class StartupManager {
 
     func setupStartupFolder() {
         let fileManager = FileManager.default
-        if !fileManager.fileExists(atPath: startupFolderURL.path) {
+        if !fileManager.fileExists(atPath: startupFolderPath.path) {
             do {
-                try fileManager.createDirectory(at: startupFolderURL, withIntermediateDirectories: true, attributes: nil)
-                log.info("Created Startup folder at \(startupFolderURL.path)")
+                try fileManager.createDirectory(at: startupFolderPath, withIntermediateDirectories: true, attributes: nil)
+                log.info("Created Startup folder at \(startupFolderPath)")
             } catch {
                 log.error("Failed to create Startup folder: \(error)")
             }
@@ -85,25 +87,46 @@ class StartupManager {
     }
 
     func loadStartupItems() {
-        let fileManager = FileManager.default
-        do {
-            let files = try fileManager.contentsOfDirectory(at: startupFolderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
-            let newItems = files.map { StartupItem(url: $0) }
+        let enumerator = FileManager.default.enumerator(at: startupFolderPath, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]) {
+            url, error in
+            log.warning("Failed to enumerate Startup folder at \(url): \(error)")
+            return true
+        }
+        let startupPathComponents = startupFolderPath.filePath?.components
 
-            var mergedItems: [StartupItem] = []
-            for newItem in newItems {
-                if let existingItem = startupItems.first(where: { $0.url == newItem.url }) {
-                    existingItem.name = newItem.name
-                    existingItem.type = newItem.type
-                    mergedItems.append(existingItem)
-                } else {
-                    mergedItems.append(newItem)
+        var newItems: [StartupItem] = []
+        while let file = (enumerator?.nextObject() as? URL) {
+            if file.pathExtension == "app" {
+                enumerator?.skipDescendants()
+            }
+            guard let resourceValues = try? file.resourceValues(forKeys: [.isDirectoryKey]),
+                  let isDirectory = resourceValues.isDirectory, !isDirectory
+            else {
+                continue
+            }
+
+            var folder: FilePath.ComponentView?
+            if let startupPathComponents, let path = file.filePath {
+                let subfolder = path.removingLastComponent().components.trimmingPrefix(startupPathComponents)
+                if !subfolder.isEmpty {
+                    folder = FilePath.ComponentView(subfolder)
                 }
             }
-            startupItems = mergedItems
-        } catch {
-            log.error("Failed to read Startup folder: \(error)")
+            newItems.append(StartupItem(url: file, folder: folder))
         }
+
+        var mergedItems: [StartupItem] = []
+        for newItem in newItems {
+            if let existingItem = startupItems.first(where: { $0.url == newItem.url }) {
+                existingItem.name = newItem.name
+                existingItem.type = newItem.type
+                existingItem.folder = newItem.folder
+                mergedItems.append(existingItem)
+            } else {
+                mergedItems.append(newItem)
+            }
+        }
+        startupItems = mergedItems
     }
 
     func launchStartupItems() {
@@ -111,8 +134,6 @@ class StartupManager {
             item.launch()
         }
     }
-
-    @ObservationIgnored @Default(.startupFolderPath) private var startupFolderPath
 
 }
 
