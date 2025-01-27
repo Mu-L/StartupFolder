@@ -42,7 +42,6 @@ upload:
 	rsync -avz Releases/*.html hetzner:/static/lowtechguys/ReleaseNotes/
 	rsync -avzP Releases/appcast.xml hetzner:/static/lowtechguys/startupfolder/
 	cfcli -d lowtechguys.com purge
-	$(MAKE) sentry
 
 release:
 	gh release create v$(VERSION) -F ReleaseNotes/$(VERSION).md "Releases/$(NAME)-$(VERSION).dmg#$(NAME).dmg"

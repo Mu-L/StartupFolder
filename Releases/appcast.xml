@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>StartupFolder</title>
+        <item>
+            <title>1.0</title>
+            <pubDate>Tue, 28 Jan 2025 00:10:33 +0200</pubDate>
+            <link>https://lowtechguys.com/startupfolder</link>
+            <sparkle:fullReleaseNotesLink>https://github.com/FuzzyIdeas/StartupFolder/releases</sparkle:fullReleaseNotesLink>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://files.lowtechguys.com/ReleaseNotes/StartupFolder-1.0.html</sparkle:releaseNotesLink>
+            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.0.dmg" length="3711578" type="application/octet-stream" sparkle:edSignature="g2nZYP6vdXiyU1vIwv5ebT7A8A5po3UWm6WTbU942HMFrluNxLmDWArLCPW3c8whZ5ZN13tm2pGeE4dVLAesBg=="/>
+        </item>
+    </channel>
+</rss>

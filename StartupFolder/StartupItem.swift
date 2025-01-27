@@ -220,7 +220,7 @@ class StartupItem: Identifiable {
             .script
         } else if url.isExecutable() {
             .binary
-        } else if let scriptRunner = ScriptRunner(fromExtension: url.pathExtension) {
+        } else if let _ = ScriptRunner(fromExtension: url.pathExtension) {
             .script
         } else {
             .other
