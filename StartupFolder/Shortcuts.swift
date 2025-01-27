@@ -221,14 +221,7 @@ class ShortcutsManager {
         }
     }
 
-    var shortcutsMap: [String: [Shortcut]]? = !SWIFTUI_PREVIEW
-        ? nil
-        : [
-            "Other": [
-                Shortcut(name: "Disconnect builtin screen", identifier: "F2185611-9E75-4FC1-A4D1-67DB58B35992"),
-                Shortcut(name: "Connect Sidecar", identifier: "F1185611-9E75-4FC1-A4D1-67DB58B35992"),
-            ],
-        ]
+    var shortcutsMap: [String: [Shortcut]]?
     var cacheIsValid = true
 
     func invalidateCache() {

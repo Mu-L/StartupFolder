@@ -26,7 +26,11 @@ struct SidebarView: View {
             List(selection: $selectedStatuses) {
                 Text("All").tag(StartupItem.ExecutionStatus?.none).bold()
                 ForEach(StartupItem.ExecutionStatus.allCases.sorted(using: KeyPathComparator(\.text)), id: \.self) { status in
-                    Text(status.text).tag(status as StartupItem.ExecutionStatus?)
+                    HStack {
+                        Image(systemName: status.iconName)
+                            .foregroundColor(status.color)
+                        Text(status.text)
+                    }.tag(status as StartupItem.ExecutionStatus?)
                 }
             }
             .frame(maxHeight: 180)
@@ -41,7 +45,11 @@ struct SidebarView: View {
             List(selection: $selectedTypes) {
                 Text("All").tag(StartupItem.StartupItemType?.none).bold()
                 ForEach(StartupItem.StartupItemType.allCases.sorted(using: KeyPathComparator(\.text)), id: \.self) { type in
-                    Text(type.text).tag(type as StartupItem.StartupItemType?)
+                    HStack {
+                        Image(systemName: type.iconName)
+                            .foregroundColor(type.color)
+                        Text(type.text)
+                    }.tag(type as StartupItem.StartupItemType?)
                 }
             }
             .frame(maxHeight: 210)
@@ -57,10 +65,13 @@ struct SidebarView: View {
                 Text("All").tag(FilePath.ComponentView?.none).bold()
 
                 ForEach(startupManager.folders, id: \.self) { folder in
-                    Text(folder.string)
-                        .truncationMode(.middle)
-                        .lineLimit(1)
-                        .tag(folder as FilePath.ComponentView?)
+                    HStack {
+                        Image(systemName: "folder")
+                            .foregroundColor(.blue)
+                        Text(folder.string)
+                            .truncationMode(.middle)
+                            .lineLimit(1)
+                    }.tag(folder as FilePath.ComponentView?)
                 }
             }
             .listStyle(.sidebar)
@@ -69,8 +80,8 @@ struct SidebarView: View {
             }
 
         }
-        .frame(minWidth: 120)
-        .padding()
+        .frame(minWidth: 140)
+        .padding(.leading, 10)
     }
 
     @State private var selectedStatuses: Set<StartupItem.ExecutionStatus?> = []
@@ -83,6 +94,43 @@ struct SidebarView: View {
         selectedFolders.removeAll()
         selectedTypes.removeAll()
         startupManager.filteredStartupItems = nil
+    }
+}
+
+// Extend the enums to include icon names and colors
+extension StartupItem.ExecutionStatus {
+    var iconName: String {
+        switch self {
+        case .notStarted: "circle"
+        case .running: "play.circle"
+        case .succeeded: "checkmark.circle"
+        case .terminated: "xmark.circle"
+        case .failed: "exclamationmark.circle"
+        }
+    }
+}
+
+extension StartupItem.StartupItemType {
+    var iconName: String {
+        switch self {
+        case .app: "app.dashed"
+        case .script: "doc.text"
+        case .binary: "apple.terminal.circle"
+        case .other: "questionmark.circle"
+        case .link: "link"
+        case .shortcut: "s.square"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .app: .purple
+        case .script: .orange
+        case .binary: .gray
+        case .other: .pink
+        case .link: .blue
+        case .shortcut: .indigo
+        }
     }
 }
 

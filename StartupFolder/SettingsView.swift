@@ -7,10 +7,15 @@
 
 import Defaults
 import Lowtech
+import LowtechIndie
 import SwiftUI
 
 struct SettingsView: View {
     @State var hoveringAgent = false
+    @ObservedObject var updateManager = UM
+
+    @Default(.checkForUpdates) var checkForUpdates
+    @Default(.updateCheckInterval) var updateCheckInterval
 
     var body: some View {
         Form {
@@ -85,6 +90,19 @@ struct SettingsView: View {
                 TextField("", value: $delayBetweenItems, formatter: NumberFormatter())
                     .frame(width: 100)
                     .textFieldStyle(.roundedBorder)
+            }
+
+            if let updater = updateManager.updater {
+                Section(header: Text("Updates *(current version: `v\(Bundle.main.version)`)*")) {
+                    Toggle("Automatically check for updates", isOn: $checkForUpdates)
+                    Picker("Update check interval", selection: $updateCheckInterval) {
+                        Text("Daily").tag(UpdateCheckInterval.daily.rawValue)
+                        Text("Every 3 days").tag(UpdateCheckInterval.everyThreeDays.rawValue)
+                        Text("Weekly").tag(UpdateCheckInterval.weekly.rawValue)
+                    }.pickerStyle(.segmented)
+
+                    GentleUpdateView(updater: updater)
+                }
             }
 
             Section(header: Text("On quit")) {

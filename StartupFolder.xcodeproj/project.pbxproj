@@ -127,7 +127,7 @@
 				C7DA8FC12D450B750004A4D7 /* WrappingHStack */,
 				C7E7FC442D467CA600EE431E /* FaviconFinder */,
 			);
-			productName = "StartupFolder";
+			productName = StartupFolder;
 			productReference = C7F164D52D3950FB00966B49 /* StartupFolder.app */;
 			productType = "com.apple.product-type.application";
 		};

@@ -77,8 +77,16 @@ struct FooterView: View {
 
         let scriptURL = startupManager.startupFolderPath.appendingPathComponent(name.safeFilename)
         let shebang = selectedRunner == nil ? "" : "#!\(selectedRunner!.path)\n"
-        FileManager.default.createFile(atPath: scriptURL.path, contents: shebang.data(using: .utf8), attributes: [.posixPermissions: 0o755])
-        NSWorkspace.shared.open([scriptURL], withApplicationAt: Defaults[.editorApp], configuration: NSWorkspace.OpenConfiguration())
+        FileManager.default.createFile(
+            atPath: scriptURL.path,
+            contents: shebang.data(using: .utf8),
+            attributes: [.posixPermissions: selectedRunner == nil ? 0o644 : 0o755]
+        )
+        NSWorkspace.shared.open(
+            [scriptURL],
+            withApplicationAt: Defaults[.editorApp],
+            configuration: NSWorkspace.OpenConfiguration()
+        )
         startupManager.loadStartupItems()
     }
 
@@ -86,17 +94,23 @@ struct FooterView: View {
         guard url.isNotEmpty, let url = URL(string: url) else {
             return
         }
-        let weblocContent = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <plist version="1.0">
-        <dict>
-            <key>URL</key>
-            <string>\(url)</string>
-        </dict>
-        </plist>
-        """
-        let weblocURL = startupManager.startupFolderPath.appendingPathComponent((name.safeFilename ?! url.absoluteString.safeFilename) + ".webloc")
-        try? weblocContent.write(to: weblocURL, atomically: true, encoding: .utf8)
+        if url.scheme?.starts(with: "http") ?? false {
+            let weblocContent = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <plist version="1.0">
+            <dict>
+                <key>URL</key>
+                <string>\(url)</string>
+            </dict>
+            </plist>
+            """
+            let weblocURL = startupManager.startupFolderPath.appendingPathComponent((name.safeFilename ?! url.absoluteString.safeFilename) + ".webloc")
+            try? weblocContent.write(to: weblocURL, atomically: true, encoding: .utf8)
+        } else {
+            let urlContent = url.absoluteString
+            let urlFile = startupManager.startupFolderPath.appendingPathComponent((name.safeFilename ?! url.absoluteString.safeFilename) + ".link")
+            try? urlContent.write(to: urlFile, atomically: true, encoding: .utf8)
+        }
         startupManager.loadStartupItems()
     }
 
@@ -239,5 +253,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .frame(width: 800, height: 400)
+        .frame(width: 800, height: 750)
 }

@@ -102,7 +102,11 @@ class StartupItem: Identifiable {
             case .running:
                 .orange
             case .succeeded:
-                .green
+                if #available(macOS 15.0, *) {
+                    .green.mix(with: .primary, by: 0.2)
+                } else {
+                    .green
+                }
             case .failed:
                 .red
             case .terminated:
@@ -139,7 +143,7 @@ class StartupItem: Identifiable {
             else {
                 return nil
             }
-            return ScriptRunner(from: firstLine).utType ?? .executable
+            return ScriptRunner(fromShebang: firstLine)?.utType ?? .executable
         }
         guard let resourceValues = try? url.resourceValues(forKeys: [.contentTypeKey]),
               let utType = resourceValues.contentType
@@ -150,14 +154,27 @@ class StartupItem: Identifiable {
     }()
 
     @ObservationIgnored lazy var siteURL: URL? = {
-        guard type == .link, let data = try? Data(contentsOf: url),
-              let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
-              let siteURLString = plist["URL"] as? String,
-              let siteURL = URL(string: siteURLString)
-        else {
+        guard type == .link else {
             return nil
         }
-        return siteURL
+        if url.pathExtension == "webloc" {
+            guard let data = try? Data(contentsOf: url),
+                  let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
+                  let siteURLString = plist["URL"] as? String,
+                  let siteURL = URL(string: siteURLString)
+            else {
+                return nil
+            }
+            return siteURL
+        } else if ["link", "txt", "url"].contains(url.pathExtension) {
+            guard let content = try? String(contentsOf: url).trimmed,
+                  let siteURL = URL(string: content)
+            else {
+                return nil
+            }
+            return siteURL
+        }
+        return nil
     }()
 
     var isNetLink: Bool {
@@ -191,14 +208,20 @@ class StartupItem: Identifiable {
     static func determineType(of url: URL) -> StartupItemType {
         if url.pathExtension == "app" || (url.resolvingAliasOrSymlink).pathExtension == "app" {
             .app
+        } else if ["webloc", "link", "txt", "url"].contains(url.pathExtension) {
+            if let _ = try? String(contentsOf: url).url {
+                .link
+            } else {
+                .other
+            }
+        } else if url.pathExtension == "shortcut" {
+            .shortcut
         } else if url.isExecutable(), !url.isBinary() {
             .script
         } else if url.isExecutable() {
             .binary
-        } else if url.pathExtension == "webloc" {
-            .link
-        } else if url.pathExtension == "shortcut" {
-            .shortcut
+        } else if let scriptRunner = ScriptRunner(fromExtension: url.pathExtension) {
+            .script
         } else {
             .other
         }
@@ -269,7 +292,9 @@ class StartupItem: Identifiable {
             launchApp()
         case .script, .binary, .shortcut:
             launchExecutable()
-        case .link, .other:
+        case .link:
+            launchURL()
+        case .other:
             launchWithWorkspace()
         }
     }
@@ -380,7 +405,9 @@ class StartupItem: Identifiable {
                 log.error("Failed to extract shortcut from \(url)")
                 return
             }
-            process = shellProc("/usr/bin/shortcuts", args: ["run", shortcut.identifier])
+            process = shellProc("/usr/bin/shortcuts", args: ["run", shortcut.identifier ?! shortcut.name])
+        } else if type == .script, !url.isExecutable(), let scriptRunner = ScriptRunner(fromExtension: url.pathExtension) {
+            process = shellProc(scriptRunner.path, args: [url.path])
         } else {
             process = shellProc(url.path, args: [])
         }
@@ -407,16 +434,30 @@ class StartupItem: Identifiable {
         }
     }
 
+    private func launchURL() {
+        status = NSWorkspace.shared.open(siteURL ?? url) ? .succeeded : .failed
+    }
+
     private func launchWithWorkspace() {
         status = NSWorkspace.shared.open(url) ? .succeeded : .failed
     }
 
     private func extractShortcut(from url: URL) -> Shortcut? {
-        guard let identifier = try? String(contentsOf: url).trimmed else {
-            return nil
+        let identifier: String?
+        if let fileHandle = try? FileHandle(forReadingFrom: url) {
+            let data = fileHandle.readData(ofLength: 36) // UUID length
+            identifier = String(data: data, encoding: .utf8)?.trimmed
+        } else {
+            identifier = nil
         }
-        return SHM.shortcutsMap?.values.joined().first { $0.identifier == identifier }
-            ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: identifier)
+
+        if let identifier, !identifier.isEmpty {
+            return SHM.shortcutsMap?.values.joined().first { $0.identifier == identifier }
+                ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: identifier)
+        } else {
+            return SHM.shortcutsMap?.values.joined().first { $0.name == url.deletingPathExtension().lastPathComponent }
+                ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: "")
+        }
     }
 
     private func getLanguageIcon(for url: URL) -> NSImage? {

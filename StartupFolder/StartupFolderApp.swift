@@ -32,20 +32,21 @@ class AppDelegate: LowtechIndieAppDelegate {
     }
 
     override func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.disableRelaunchOnLogin()
         if !SWIFTUI_PREVIEW, let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == Bundle.main.bundleIdentifier && $0.processIdentifier != NSRunningApplication.current.processIdentifier }) {
             #if DEBUG
                 app.forceTerminate()
             #else
                 app.activate()
                 NSApp.terminate(nil)
+                return
             #endif
-            return
         }
 
         super.applicationDidFinishLaunching(notification)
         setupCleanup()
-        UM.updater = updateController.updater
         setupLaunchAtLogin()
+        UM.updater = updateController.updater
         SM.setupStartupFolder()
         SM.loadStartupItems()
         SM.watchStartupFolder()
@@ -53,6 +54,10 @@ class AppDelegate: LowtechIndieAppDelegate {
             NSApp.setActivationPolicy(.accessory)
             mainWindow?.close()
             SM.launchStartupItems()
+        } else if !SWIFTUI_PREVIEW {
+            NSApp.setActivationPolicy(.regular)
+            WM.open("main")
+            focus()
         }
         if !SWIFTUI_PREVIEW {
             startShortcutWatcher()
@@ -68,13 +73,7 @@ class AppDelegate: LowtechIndieAppDelegate {
             didBecomeActiveAtLeastOnce = true
             return
         }
-
-        if let mainWindow {
-            focus()
-            mainWindow.orderFrontRegardless()
-        } else {
-            WM.open("main")
-        }
+        log.debug("Became active")
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
@@ -95,6 +94,59 @@ class AppDelegate: LowtechIndieAppDelegate {
                 item.app = nil
             }
         }
+    }
+
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        guard !SWIFTUI_PREVIEW else {
+            return true
+        }
+
+        log.debug("Reopened")
+
+        if let mainWindow {
+            focus()
+            mainWindow.orderFrontRegardless()
+        } else {
+            WM.open("main")
+        }
+        return true
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        log.debug("Open URLs: \(urls)")
+        NSApp.deactivate()
+        Task {
+            await handleURLs(application, urls)
+        }
+    }
+
+    func application(_ sender: NSApplication, openFiles filenames: [String]) {
+        log.debug("Open files: \(filenames)")
+        NSApp.deactivate()
+        Task {
+            await handleURLs(sender, filenames.compactMap(\.url))
+        }
+    }
+
+    func handleURLs(_ application: NSApplication, _ urls: [URL]) async {
+        for url in urls {
+            do {
+                for url in urls {
+                    if url.pathExtension == "link", let fileURL = try (String(contentsOf: url)).url {
+                        NSWorkspace.shared.open(fileURL)
+                    }
+                }
+            } catch {
+                log.error("Failed to open URL \(url): \(error)")
+                await application.reply(toOpenOrPrint: .failure)
+                return
+            }
+        }
+        await application.reply(toOpenOrPrint: .success)
+    }
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -183,11 +235,11 @@ struct StartupFolderApp: App {
     @Default(.labelStyle) var labelStyle
 
     var body: some Scene {
-        WindowGroup("Startup Folder", id: "main") {
+        Window("Startup Folder", id: "main") {
             ContentView()
                 .frame(minWidth: 800, minHeight: 200)
         }
-        .defaultSize(width: 800, height: 600)
+        .defaultSize(width: 800, height: 750)
         .commands {
             CommandMenu("Startup Folder") {
                 Button("Check for Updates") {
@@ -197,7 +249,13 @@ struct StartupFolderApp: App {
             }
         }
         .onChange(of: wm.windowToOpen) {
-            guard let window = wm.windowToOpen else {
+            guard let window = wm.windowToOpen, !SWIFTUI_PREVIEW else {
+                return
+            }
+            if window == "main", let mainWindow = NSApp.windows.first(where: { $0.title == "Startup Folder" }) {
+                focus()
+                mainWindow.orderFrontRegardless()
+                wm.windowToOpen = nil
                 return
             }
 

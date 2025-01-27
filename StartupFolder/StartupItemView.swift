@@ -9,6 +9,17 @@ struct StartupItemView: View {
     @State var item: StartupItem
     @State var runtime: String?
 
+    var status: some View {
+        HStack {
+            if let code = item.exitCode {
+                Text("Exit Code: \(code)").fixedSize().monospacedDigit()
+            }
+            if let duration = runtime {
+                Text("Run time: \(duration)").monospacedDigit()
+            }
+        }.font(.caption).foregroundStyle(.secondary)
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack(alignment: .top) {
@@ -37,35 +48,39 @@ struct StartupItemView: View {
                             Text("(in \(folder.map(\.string).joined(separator: "/")))").mono(9).foregroundStyle(.secondary)
                         }
                     }
-                    if !item.isTrashed {
-                        HStack {
-                            if item.isTerminating {
-                                ProgressView()
-                                Text("Terminating...").foregroundStyle(.secondary)
-                            }
-                            if let code = item.exitCode {
-                                Text("Exit Code: \(code)").fixedSize().monospacedDigit()
-                            }
-                            if let duration = runtime {
-                                Text("Run time: \(duration)").fixedSize().monospacedDigit()
-                            }
-                        }.font(.caption).foregroundStyle(.secondary)
-                    }
                 }
 
                 Spacer()
 
                 if !item.isTrashed {
-                    Text(item.status.text)
-                        .roundbg(radius: 8, verticalPadding: 2, horizontalPadding: 8, color: item.status.color.opacity(0.8), noFG: true)
+                    if item.isTerminating {
+                        ProgressView().controlSize(.small)
+                    }
+                    Text(item.isTerminating ? "Terminating..." : item.status.text)
+                        .roundbg(
+                            radius: 7, verticalPadding: 2, horizontalPadding: 8,
+                            color: item.isTerminating ? .red : item.status.color.opacity(0.8), noFG: true
+                        )
                         .foregroundStyle(.white)
+                        .font(.round(11))
+                        .opacity(0.75)
                 }
-            }.padding(.bottom, 2)
+            }.padding(.bottom, 10)
 
-            if item.isTrashed {
-                trashedActions.fixedSize()
-            } else {
-                actions.fixedSize()
+            HStack {
+                if item.isTrashed {
+                    trashedActions
+                        .buttonStyle(FlatButton(color: .fg.warm.opacity(0.1), textColor: .bg.gray, hoverColor: .fg.warm, radius: 5, horizontalPadding: 5, verticalPadding: 2))
+                        .font(.round(11))
+                        .fixedSize()
+                } else {
+                    actions
+                        .buttonStyle(FlatButton(color: .fg.warm.opacity(0.1), textColor: .bg.gray, hoverColor: .fg.warm, radius: 5, horizontalPadding: 5, verticalPadding: 2))
+                        .font(.round(11))
+                        .fixedSize()
+                    Spacer()
+                    status
+                }
             }
         }
         .padding(2)

@@ -100,7 +100,7 @@ class StartupManager {
     }
 
     func loadStartupItems() {
-        let enumerator = FileManager.default.enumerator(at: startupFolderPath, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]) {
+        let enumerator = FileManager.default.enumerator(at: startupFolderPath, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles, .skipsPackageDescendants, .includesDirectoriesPostOrder]) {
             url, error in
             log.warning("Failed to enumerate Startup folder at \(url): \(error)")
             return true
@@ -109,15 +109,13 @@ class StartupManager {
 
         var newItems: [StartupItem] = []
         while let file = (enumerator?.nextObject() as? URL) {
-            if file.pathExtension == "app" {
-                enumerator?.skipDescendants()
-            }
             guard let resourceValues = try? file.resourceValues(forKeys: [.isDirectoryKey]),
                   let isDirectory = resourceValues.isDirectory, !isDirectory
             else {
                 continue
             }
 
+            log.debug("Adding item at \(file.path)")
             var folder: FilePath.ComponentView?
             if let startupPathComponents, let path = file.filePath {
                 let subfolder = path.removingLastComponent().components.trimmingPrefix(startupPathComponents)

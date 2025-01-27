@@ -63,9 +63,19 @@ enum ScriptRunner: String, CaseIterable {
     case osascript
     case node
 
-    init(from shebang: String) {
+    init?(fromShebang shebang: String) {
         let path = shebang.replacingOccurrences(of: "#!", with: "").replacingOccurrences(of: "/usr/bin/env ", with: "").trimmingCharacters(in: .whitespaces)
-        self = ScriptRunner.allCases.first { $0.path == path } ?? ScriptRunner.allCases.first { $0.path.contains(path) } ?? .sh
+        guard let runner = ScriptRunner.allCases.first(where: { $0.path == path }) ?? ScriptRunner.allCases.first(where: { $0.path.contains(path) }) else {
+            return nil
+        }
+        self = runner
+    }
+
+    init?(fromExtension ext: String) {
+        guard let runner = ScriptRunner.allCases.first(where: { $0.fileExtension == ext }) else {
+            return nil
+        }
+        self = runner
     }
 
     var fileExtension: String {
