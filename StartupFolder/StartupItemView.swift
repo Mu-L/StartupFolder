@@ -18,7 +18,7 @@ struct StartupItemView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 14, height: 14)
-                            .roundbg(radius: 4, verticalPadding: 1, horizontalPadding: 1, color: .primary.opacity(item.isNetLink ? 1 : 0.2))
+                            .roundbg(radius: 4, verticalPadding: 1, horizontalPadding: 1, color: item.isNetLink ? .white : .highContrast.opacity(0.1))
                         Text(item.shouldShowExtension ? item.name : item.name.ns.deletingPathExtension)
                             .round(14, weight: .heavy)
                             .foregroundColor(.fg.warm.opacity(0.9))

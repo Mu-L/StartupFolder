@@ -68,4 +68,6 @@ extension Defaults.Keys {
     static let onCleanup = Key<[CleanupBehavior]>("onCleanup", default: [])
     static let startupDelay = Key<Double>("startupDelay", default: 0)
     static let delayBetweenItems = Key<Double>("delayBetweenItems", default: 0)
+    static let firstWindowCloseNoticeShown = Key<Bool>("firstWindowCloseNoticeShown", default: false)
+    static let loadAgent = Key<Bool>("loadAgent", default: true)
 }

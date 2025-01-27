@@ -127,7 +127,7 @@
 				C7DA8FC12D450B750004A4D7 /* WrappingHStack */,
 				C7E7FC442D467CA600EE431E /* FaviconFinder */,
 			);
-			productName = "Startup Folder";
+			productName = "StartupFolder";
 			productReference = C7F164D52D3950FB00966B49 /* StartupFolder.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -325,7 +325,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = StartupFolder/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Startup Folder";
+				INFOPLIST_KEY_CFBundleDisplayName = StartupFolder;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -356,7 +356,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = StartupFolder/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Startup Folder";
+				INFOPLIST_KEY_CFBundleDisplayName = StartupFolder;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (

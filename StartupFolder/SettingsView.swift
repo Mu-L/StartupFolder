@@ -10,8 +10,35 @@ import Lowtech
 import SwiftUI
 
 struct SettingsView: View {
+    @State var hoveringAgent = false
+
     var body: some View {
         Form {
+            HStack {
+                (
+                    Text("Launch agent")
+                        + Text("\nLoad or unload the agent that runs items at login")
+                        .round(11, weight: .regular).foregroundColor(.secondary)
+                ).fixedSize()
+                Spacer()
+                Toggle(isOn: $loadAgent) {
+                    HStack {
+                        Circle()
+                            .fill(hoveringAgent ? Color.orange : (loadAgent ? Color.green : Color.red))
+                            .frame(width: 10, height: 10)
+                        Text(hoveringAgent ? (loadAgent ? "Unload" : "Load") : (loadAgent ? "Loaded" : "Unloaded"))
+                    }
+                }
+                .toggleStyle(.button)
+                .buttonStyle(FlatButton(color: .primary.opacity(0.2), textColor: .primary))
+                .onHover { hovering in
+                    hoveringAgent = hovering
+                }
+                .onChange(of: loadAgent) {
+                    setupLaunchAtLogin(loadAgent: loadAgent)
+                }
+            }
+
             HStack {
                 (
                     Text("Code editor")
@@ -23,7 +50,7 @@ struct SettingsView: View {
                     selectEditorApp()
                 }.truncationMode(.middle)
             }
-            .padding()
+
             HStack {
                 (
                     Text("Startup folder path")
@@ -35,7 +62,7 @@ struct SettingsView: View {
                     selectStartupFolderPath()
                 }.truncationMode(.middle)
             }
-            .padding()
+
             HStack {
                 (
                     Text("Startup delay")
@@ -47,7 +74,7 @@ struct SettingsView: View {
                     .frame(width: 100)
                     .textFieldStyle(.roundedBorder)
             }
-            .padding()
+
             HStack {
                 (
                     Text("Delay between items")
@@ -59,7 +86,7 @@ struct SettingsView: View {
                     .frame(width: 100)
                     .textFieldStyle(.roundedBorder)
             }
-            .padding()
+
             Section(header: Text("On quit")) {
                 ForEach(CleanupBehavior.allCases) { behavior in
                     Toggle(behavior.text, isOn: Binding(
@@ -91,6 +118,7 @@ struct SettingsView: View {
     @Default(.onCleanup) private var onCleanup
     @Default(.startupDelay) private var startupDelay
     @Default(.delayBetweenItems) private var delayBetweenItems
+    @Default(.loadAgent) private var loadAgent
 
     private func selectEditorApp() {
         let panel = NSOpenPanel()

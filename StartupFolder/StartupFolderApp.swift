@@ -33,8 +33,12 @@ class AppDelegate: LowtechIndieAppDelegate {
 
     override func applicationDidFinishLaunching(_ notification: Notification) {
         if !SWIFTUI_PREVIEW, let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == Bundle.main.bundleIdentifier && $0.processIdentifier != NSRunningApplication.current.processIdentifier }) {
-            app.activate()
-            NSApp.terminate(nil)
+            #if DEBUG
+                app.forceTerminate()
+            #else
+                app.activate()
+                NSApp.terminate(nil)
+            #endif
             return
         }
 
@@ -138,20 +142,26 @@ class AppDelegate: LowtechIndieAppDelegate {
         }
     }
 
-    func setupLaunchAtLogin() {
-        let currentService = SMAppService.agent(plistName: "com.lowtechguys.StartupFolder.plist")
-        if currentService.status == .notFound {
-            do {
-                try currentService.unregister()
-            } catch {
-                log.error("Failed to unregister service: \(error)")
-            }
-        }
+}
+
+func setupLaunchAtLogin(loadAgent: Bool? = nil) {
+    let loadAgent = loadAgent ?? Defaults[.loadAgent]
+    let currentService = SMAppService.agent(plistName: "com.lowtechguys.StartupFolder.plist")
+    if currentService.status == .notFound || !loadAgent {
         do {
-            try currentService.register()
+            try currentService.unregister()
         } catch {
-            log.error("Failed to register service: \(error)")
+            log.error("Failed to unregister service: \(error)")
         }
+    }
+
+    guard loadAgent else {
+        return
+    }
+    do {
+        try currentService.register()
+    } catch {
+        log.error("Failed to register service: \(error)")
     }
 }
 

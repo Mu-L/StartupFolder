@@ -123,6 +123,7 @@ struct FooterView: View {
 
 struct ContentView: View {
     @Default(.labelStyle) private var labelStyle
+    @Default(.firstWindowCloseNoticeShown) private var firstWindowCloseNoticeShown
     @State var startupManager = SM
 
     var itemList: some View {
@@ -196,7 +197,6 @@ struct ContentView: View {
 
                 FooterView().padding(.bottom, 5).labelStyle(labelStyle)
             }
-            .scrollContentBackground(.hidden)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Picker("Labels", selection: $labelStyle) {
@@ -205,12 +205,35 @@ struct ContentView: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .help("Choose the style for the buttons")
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        startupManager.loadStartupItems()
+                    } label: {
+                        Label("Reload", systemImage: "arrow.clockwise")
+                    }.help("Reloads the startup items from the folder")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     SettingsLink().labelStyle(.iconOnly)
                 }
             }
+            .onDisappear {
+                if !firstWindowCloseNoticeShown {
+                    firstWindowCloseNoticeShown = true
+                    showAlert()
+                }
+            }
         }
+    }
+
+    private func showAlert() {
+        let alert = NSAlert()
+        alert.messageText = "App will continue to run in the background"
+        alert.informativeText = "The runtime of the apps and processes will keep being tracked. You can show the window again by running the app again."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 }
 
