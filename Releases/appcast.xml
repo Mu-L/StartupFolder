@@ -11,7 +11,7 @@
             <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:releaseNotesLink>https://files.lowtechguys.com/ReleaseNotes/StartupFolder-1.0.html</sparkle:releaseNotesLink>
-            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.0.dmg" length="3711578" type="application/octet-stream" sparkle:edSignature="g2nZYP6vdXiyU1vIwv5ebT7A8A5po3UWm6WTbU942HMFrluNxLmDWArLCPW3c8whZ5ZN13tm2pGeE4dVLAesBg=="/>
+            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.0.dmg" length="3763038" type="application/octet-stream" sparkle:edSignature="8ss/66yiGYgc49gvLDmb3pbbPZ+3ky8iiXujPeNLy8NWqwK3OjAPznVlaLoKjNxpTrCTMp2WiL8uw0/AcuIqAA=="/>
         </item>
     </channel>
 </rss>

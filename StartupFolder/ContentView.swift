@@ -225,21 +225,30 @@ struct ContentView: View {
                     .help("Choose the style for the buttons")
                 }
                 ToolbarItem(placement: .primaryAction) {
+                    let operationInProgress = startupManager.launchInProgress || startupManager.stopInProgress
                     Button {
-                        if startupManager.allLaunched {
+                        if operationInProgress {
+                            startupManager.cancelOperations()
+                        } else if startupManager.allLaunched {
                             startupManager.stopStartupItems()
                         } else {
                             startupManager.launchStartupItems(delay: 0)
                         }
                     } label: {
-                        if startupManager.launchInProgress {
-                            ProgressView()
+                        if operationInProgress, hoveringStartStop {
+                            Label("Cancel", systemImage: "xmark.circle.fill")
+                        } else if operationInProgress, !hoveringStartStop {
+                            ProgressView().controlSize(.small)
                         } else if startupManager.allLaunched {
                             Label("Stop all", systemImage: "stop.fill")
                         } else {
                             Label("Start all", systemImage: "play.fill")
                         }
-                    }.help("\(startupManager.allLaunched ? "Stops" : "Launches") all the startup items right now")
+                    }
+                    .help(operationInProgress ? "Cancel the \(startupManager.launchInProgress ? "launch" : "stop") operation" : "\(startupManager.allLaunched ? "Stops" : "Launches") all the startup items right now")
+                    .onHover { hovering in
+                        hoveringStartStop = hovering
+                    }
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -253,6 +262,10 @@ struct ContentView: View {
                 }
             }
             .onDisappear {
+                if let delegate = AppDelegate.shared, delegate.isLaunchedAtLogin {
+                    delegate.isLaunchedAtLogin = false
+                    return
+                }
                 if !firstWindowCloseNoticeShown {
                     firstWindowCloseNoticeShown = true
                     showAlert()
@@ -260,6 +273,8 @@ struct ContentView: View {
             }
         }
     }
+
+    @State private var hoveringStartStop = false
 
     private func showAlert() {
         let alert = NSAlert()

@@ -25,8 +25,12 @@ class StartupManager {
     var folders: [FilePath.ComponentView] = []
 
     var launchInProgress = false
+    var stopInProgress = false
 
     var allLaunched = false
+
+    var launchWorkItems: [DispatchWorkItem] = []
+    var stopTask: Task<Void, Never>?
 
     var startupItems: [StartupItem] = [] {
         didSet {
@@ -149,21 +153,41 @@ class StartupManager {
         launchInProgress = true
 
         if (delay ?? startupDelay) > 0 {
-            mainAsyncAfter(startupDelay) {
+            let workItem = mainAsyncAfter(startupDelay) {
                 self.runStartupItemsWithDelay()
             }
+            launchWorkItems = [workItem]
         } else {
             runStartupItemsWithDelay()
         }
     }
 
-    func stopStartupItems() {
-        launchInProgress = true
-        for item in startupItems {
-            Task { await item.stop() }
+    func cancelOperations() {
+        for workItem in launchWorkItems {
+            workItem.cancel()
         }
+        launchWorkItems = []
+        stopTask?.cancel()
         launchInProgress = false
-        allLaunched = false
+        stopInProgress = false
+    }
+
+    func stopStartupItems() {
+        stopInProgress = true
+        stopTask = Task {
+            await withDiscardingTaskGroup { group in
+                for item in startupItems {
+                    let added = group.addTaskUnlessCancelled {
+                        let _ = await item.stop()
+                    }
+                    guard added else {
+                        break
+                    }
+                }
+            }
+            stopInProgress = false
+            allLaunched = false
+        }
     }
 
     @ObservationIgnored @Default(.startupDelay) private var startupDelay
@@ -181,13 +205,14 @@ class StartupManager {
 
         let count = startupItems.count
         for (index, item) in startupItems.sorted(by: \.name).enumerated() {
-            mainAsyncAfter(delayBetweenItems * index.d) {
+            let workItem = mainAsyncAfter(delayBetweenItems * index.d) {
                 item.launch()
                 if index == count - 1 {
                     self.launchInProgress = false
                     self.allLaunched = true
                 }
             }
+            launchWorkItems.append(workItem)
         }
     }
 

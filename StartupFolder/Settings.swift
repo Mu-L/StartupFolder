@@ -72,4 +72,5 @@ extension Defaults.Keys {
     static let loadAgent = Key<Bool>("loadAgent", default: true)
     static let stopAskingOnQuit = Key<Bool>("stopAskingOnQuit", default: false)
     static let quitDirectly = Key<Bool>("quitDirectly", default: false)
+    static let showWindowAtStartup = Key<Bool>("showWindowAtStartup", default: false)
 }

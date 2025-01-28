@@ -92,6 +92,14 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
             }
 
+            Toggle(isOn: $showWindowAtStartup) {
+                (
+                    Text("Show window at startup")
+                        + Text("\nShow the main window when StartupFolder starts at login")
+                        .round(11, weight: .regular).foregroundColor(.secondary)
+                ).fixedSize()
+            }
+
             if let updater = updateManager.updater {
                 Section(header: Text("Updates *(current version: `v\(Bundle.main.version)`)*")) {
                     Toggle("Automatically check for updates", isOn: $checkForUpdates)
@@ -122,7 +130,6 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(minWidth: 400, minHeight: 200)
         .alert(isPresented: $showErrorAlert) {
             Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
         }
@@ -137,6 +144,7 @@ struct SettingsView: View {
     @Default(.startupDelay) private var startupDelay
     @Default(.delayBetweenItems) private var delayBetweenItems
     @Default(.loadAgent) private var loadAgent
+    @Default(.showWindowAtStartup) private var showWindowAtStartup
 
     private func selectEditorApp() {
         let panel = NSOpenPanel()

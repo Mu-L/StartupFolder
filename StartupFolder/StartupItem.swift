@@ -20,7 +20,7 @@ extension URL {
 }
 
 @Observable
-class StartupItem: Identifiable {
+class StartupItem: Identifiable, CustomStringConvertible {
     init(url: URL, folder: FilePath.ComponentView? = nil) {
         self.url = url
         self.folder = folder
@@ -184,6 +184,12 @@ class StartupItem: Identifiable {
 
     var pid: Int32? = nil
 
+    var launching = false
+
+    var description: String {
+        "\(name) - \(type.text) - \(status.text)"
+    }
+
     var launched: Bool { status != .notStarted }
 
     var isNetLink: Bool {
@@ -332,6 +338,9 @@ class StartupItem: Identifiable {
         guard !isRunning, !isTerminating else {
             return
         }
+
+        launching = true
+        defer { launching = false }
 
         endTime = nil
 

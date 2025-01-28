@@ -21,6 +21,8 @@ class AppDelegate: LowtechIndieAppDelegate {
         NSWorkspace.shared.removeObserver(self, forKeyPath: #keyPath(NSWorkspace.runningApplications))
     }
 
+    static var shared: AppDelegate? { NSApp.delegate as? AppDelegate }
+
     var window: NSWindow?
 
     // if env contains login=true
@@ -54,8 +56,12 @@ class AppDelegate: LowtechIndieAppDelegate {
         SM.loadStartupItems()
         SM.watchStartupFolder()
         if isLaunchedAtLogin {
-            NSApp.setActivationPolicy(.accessory)
-            mainWindow?.close()
+            if Defaults[.showWindowAtStartup] {
+                WM.open("main")
+            } else {
+                NSApp.setActivationPolicy(.accessory)
+                mainWindow?.close()
+            }
             SM.launchStartupItems()
         } else if !SWIFTUI_PREVIEW {
             NSApp.setActivationPolicy(.regular)
@@ -277,7 +283,7 @@ struct StartupFolderApp: App {
         }
         .defaultSize(width: 800, height: 750)
         .commands {
-            CommandMenu("Startup Folder") {
+            CommandMenu("StartupFolder") {
                 Button("Check for Updates") {
                     UM.updater?.checkForUpdates()
                 }
@@ -303,10 +309,9 @@ struct StartupFolderApp: App {
 
         Settings {
             SettingsView()
-                .frame(minWidth: 600, minHeight: 200)
+                .frame(minWidth: 600, minHeight: 600)
         }
-        .windowResizability(.contentMinSize)
-        .defaultSize(width: 600, height: 500)
+        .defaultSize(width: 600, height: 600)
     }
 
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate

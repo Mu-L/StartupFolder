@@ -11,3 +11,23 @@
     </a>
 </p>
 
+### Run anything at startup
+
+The app creates a `Startup` folder in your home directory. Anything you place in this folder will run at startup automatically.
+
+You can place **apps**, **scripts**, **Shortcuts**, **links**, and really anything you want in the folder.
+
+#### How it works?
+
+> The app is designed to be as simple as possible. It runs a background agent that launches and keeps track of startup items.
+>
+> The agent uses zero resources and has no impact on your system's performance.
+
+
+### Drag and drop
+
+**Apps** can be dragged with `Command-Option` to create an *alias*. **Links** can be dragged directly from the browser address bar.
+
+**Shortcuts** simply need an empty file named `Shortcut Name.shortcut` and **scripts** can be written directly inside the folder.
+
+The app also provides a convenient interface that helps you *choose apps*, *pick Shortcuts*, *create scripts* and manage the startup items.

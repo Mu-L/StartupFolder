@@ -12,7 +12,7 @@ struct StartupItemView: View {
     var status: some View {
         HStack {
             if let code = item.exitCode {
-                Text("Exit Code: \(code)").fixedSize().monospacedDigit()
+                Text("Exit Code: \(code)").monospacedDigit()
             }
             if let duration = runtime {
                 Text("Run time: \(duration)").monospacedDigit()
@@ -53,13 +53,13 @@ struct StartupItemView: View {
                 Spacer()
 
                 if !item.isTrashed {
-                    if item.isTerminating {
+                    if item.isTerminating || item.launching {
                         ProgressView().controlSize(.small)
                     }
-                    Text(item.isTerminating ? "Terminating..." : item.status.text)
+                    Text(item.isTerminating ? "Terminating..." : (item.launching ? "Launching..." : item.status.text))
                         .roundbg(
                             radius: 7, verticalPadding: 2, horizontalPadding: 8,
-                            color: item.isTerminating ? .red : item.status.color.opacity(0.8), noFG: true
+                            color: item.isTerminating ? .red : item.launching ? .orange : item.status.color.opacity(0.8), noFG: true
                         )
                         .foregroundStyle(.white)
                         .font(.round(11))
@@ -79,9 +79,15 @@ struct StartupItemView: View {
                         .font(.round(11))
                         .fixedSize()
                     Spacer()
-                    status
+                    if labelStyle != .titleAndIcon {
+                        status
+                    }
                 }
             }
+            if labelStyle == .titleAndIcon {
+                status
+            }
+
         }
         .padding(2)
         .sheet(isPresented: $showStdout) {
@@ -94,7 +100,7 @@ struct StartupItemView: View {
             runtime = durationText()
         }
     }
-
+    @Default(.labelStyle) private var labelStyle
     @Environment(\.colorScheme) var colorScheme
 
     func outputView(_ text: String, path: FilePath?) -> some View {
@@ -224,6 +230,10 @@ struct StartupItemView: View {
         guard let start = item.startTime else {
             return nil
         }
+        if item.status != .running, item.endTime == nil {
+            return nil
+        }
+
         let end = item.endTime ?? Date()
         let duration = end.timeIntervalSince(start)
         return if duration < 1 {
