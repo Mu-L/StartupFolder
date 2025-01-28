@@ -28,8 +28,9 @@ You can place **apps**, **scripts**, **Shortcuts**, **links**, and really anythi
 
 ### Drag and drop
 
-**Apps** can be dragged with `Command-Option` to create an *alias*. **Links** can be dragged directly from the browser address bar.
-
-**Shortcuts** simply need an empty file named `Shortcut Name.shortcut` and **scripts** can be written directly inside the folder.
+- **Apps** can be dragged with `Command-Option` to create an *alias*
+- **Links** can be dragged directly from the browser address bar
+- **Shortcuts** simply need an empty file named `Shortcut Name.shortcut`
+- **scripts** can be written directly inside the folder
 
 The app also provides a convenient interface that helps you *choose apps*, *pick Shortcuts*, *create scripts* and manage the startup items.
