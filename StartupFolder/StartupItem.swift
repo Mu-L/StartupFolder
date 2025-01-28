@@ -45,6 +45,11 @@ class StartupItem: Identifiable {
             NSImage(named: NSImage.actionTemplateName)!
         }
 
+        let url = url
+        let type = type
+        asyncNow { [weak self] in
+            self?.fetchProcessInfo(url: url, type: type)
+        }
     }
 
     enum StartupItemType: CaseIterable {
@@ -177,6 +182,8 @@ class StartupItem: Identifiable {
         return nil
     }()
 
+    var pid: Int32? = nil
+
     var launched: Bool { status != .notStarted }
 
     var isNetLink: Bool {
@@ -204,7 +211,7 @@ class StartupItem: Identifiable {
     var id: String { "\(url.path)-\(type)" }
 
     var canTerminate: Bool {
-        status == .running && (app.map { !$0.isTerminated } ?? process?.isRunning ?? false)
+        status == .running && (app.map { !$0.isTerminated } ?? process?.isRunning ?? (pid != nil))
     }
 
     static func determineType(of url: URL) -> StartupItemType {
@@ -229,18 +236,57 @@ class StartupItem: Identifiable {
         }
     }
 
+    func fetchProcessInfo(url: URL, type: StartupItemType) {
+        switch type {
+        case .app:
+            guard let bundle = Bundle(url: url.resolvingAliasOrSymlink), let bundleID = bundle.bundleIdentifier,
+                  let runningApp = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first
+            else {
+                return
+            }
+            mainAsync { [weak self] in
+                guard let self else { return }
+                startTime = runningApp.launchDate
+                app = runningApp
+                status = .running
+            }
+        case .script, .binary:
+            guard let pid = shell("/usr/bin/pgrep", args: ["-n", "-f", url.resolvingAliasOrSymlink.path]).o?.i32
+            else { return }
+            mainAsync { [weak self] in
+                guard let self else { return }
+                self.pid = pid
+                (stdoutFilePath, stderrFilePath) = getStdoutAndStderrPaths(pid: pid)
+                startTime = getStartTime(forPid: pid)
+                status = .running
+            }
+        case .shortcut:
+            guard let shortcut, let pid = shell("/usr/bin/pgrep", args: ["-n", "-f", shortcut.identifier ?! shortcut.name]).o?.i32
+            else { return }
+            mainAsync { [weak self] in
+                guard let self else { return }
+                self.pid = pid
+                (stdoutFilePath, stderrFilePath) = getStdoutAndStderrPaths(pid: pid)
+                startTime = getStartTime(forPid: pid)
+                status = .running
+            }
+        default:
+            return
+        }
+    }
+
     func readStdout() -> String? {
-        guard let stdoutFilePath = process?.stdoutFilePath else {
+        guard let stdoutFilePath else {
             return nil
         }
-        return (try? String(contentsOfFile: stdoutFilePath)) ?? ""
+        return (try? String(contentsOf: stdoutFilePath.url)) ?? ""
     }
 
     func readStderr() -> String? {
-        guard let stderrFilePath = process?.stderrFilePath else {
+        guard let stderrFilePath else {
             return nil
         }
-        return (try? String(contentsOfFile: stderrFilePath)) ?? ""
+        return (try? String(contentsOf: stderrFilePath.url)) ?? ""
     }
 
     func trash() {
@@ -301,12 +347,12 @@ class StartupItem: Identifiable {
         }
     }
 
-    func stop() async {
+    func stop() async -> Bool {
         guard canTerminate else {
             status = .notStarted
-            return
+            return true
         }
-        await terminate()
+        return await terminate()
     }
 
     func terminate() async -> Bool {
@@ -321,6 +367,8 @@ class StartupItem: Identifiable {
             app.terminate()
         } else if let process {
             process.terminate()
+        } else if let pid {
+            kill(pid, SIGTERM)
         }
 
         if await (waitUntilTerminated(for: 3)) {
@@ -362,6 +410,8 @@ class StartupItem: Identifiable {
                 process.isRunning
             } else if let app = self.app {
                 !app.isTerminated
+            } else if let pid = self.pid {
+                kill(pid, 0) == 0
             } else {
                 false
             }
@@ -383,6 +433,9 @@ class StartupItem: Identifiable {
             status = .terminated
         } else if let process {
             let pid = process.processIdentifier
+            kill(pid, SIGKILL)
+            status = .terminated
+        } else if let pid {
             kill(pid, SIGKILL)
             status = .terminated
         }
@@ -548,4 +601,64 @@ func downloadFavicon(for url: URL) async -> NSImage? {
         log.error("Failed to retrieve or save favicon with error: \(String(describing: error))")
         return nil
     }
+}
+
+func getStartTime(forBundleID bundleID: String) -> Date? {
+    NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first?.launchDate
+}
+
+func getStartTime(forExePath exePath: String) -> Date? {
+    guard let pid = shell("/usr/bin/pgrep", args: ["-n", "-f", exePath]).o?.i32 else {
+        return nil
+    }
+
+    return getStartTime(forPid: pid)
+}
+
+func getStartTime(forPid pid: Int32) -> Date? {
+    if let proc = NSRunningApplication(processIdentifier: pid) {
+        return proc.launchDate
+    }
+    guard let timeStr = shell("/bin/ps", args: ["-o", "lstart=", "-p", "\(pid)"]).o else {
+        return nil
+    }
+
+    var time = tm()
+    strptime(timeStr, "%c", &time)
+    return Date(timeIntervalSince1970: Double(mktime(&time)))
+}
+
+func getArgumentsForPID(pid: Int32) -> [String] {
+    var args = [String]()
+
+    var mib: [Int32] = [CTL_KERN, KERN_PROCARGS2, pid]
+    var size = 0
+    sysctl(&mib, u_int(mib.count), nil, &size, nil, 0)
+
+    var buffer = [CChar](repeating: 0, count: size)
+    sysctl(&mib, u_int(mib.count), &buffer, &size, nil, 0)
+
+    // Convert buffer to a string with proper bounds checking
+    let bufferString = NSString(bytesNoCopy: &buffer, length: size, encoding: NSASCIIStringEncoding, freeWhenDone: false)
+
+    // Split the string into arguments
+    if let bufferString = bufferString as String? {
+        args = bufferString.split(separator: "\0").map { String($0) }
+    }
+
+    // Drop the first element which is the full path to the executable
+    if !args.isEmpty {
+        args.removeFirst()
+    }
+
+    return args
+}
+
+func getStdoutAndStderrPaths(pid: Int32) -> (FilePath?, FilePath?) {
+    let args = getArgumentsForPID(pid: pid)
+
+    let stdoutPath = args.first { $0.hasPrefix("__swift_stdout=") }?.replacingOccurrences(of: "__swift_stdout=", with: "").existingFilePath
+    let stderrPath = args.first { $0.hasPrefix("__swift_stderr=") }?.replacingOccurrences(of: "__swift_stderr=", with: "").existingFilePath
+
+    return (stdoutPath, stderrPath)
 }

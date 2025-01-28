@@ -168,7 +168,9 @@ class AppDelegate: LowtechIndieAppDelegate {
 
         let alert = NSAlert()
         alert.messageText = "Quit Application"
-        alert.informativeText = "Quitting the app will stop it from tracking the startup items runtime. Do you want the app to keep running in the background or quit completely?"
+        alert
+            .informativeText =
+            "Quitting the app will stop it from tracking the startup items runtime. Do you want the app to keep running in the background or quit completely?\n\nYou can always bring back the main window by launching the app again."
         alert.alertStyle = .warning
         alert.addButton(withTitle: "Keep running in the background")
         alert.addButton(withTitle: "Quit")

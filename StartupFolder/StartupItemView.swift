@@ -190,9 +190,8 @@ struct StartupItemView: View {
             }
             .foregroundStyle(.red)
 
-            if item.type != .link {
+            if item.stdoutFilePath != nil {
                 let outSize = item.stdoutFilePath?.fileSize() ?? 0
-                let errSize = item.stderrFilePath?.fileSize() ?? 0
 
                 Button {
                     if outSize < 100 * 1024 {
@@ -204,6 +203,9 @@ struct StartupItemView: View {
                     Label(outSize <= 0 ? "No output" : "View output", systemImage: "doc.text")
                 }
                 .disabled(outSize <= 0)
+            }
+            if item.stdoutFilePath != nil {
+                let errSize = item.stderrFilePath?.fileSize() ?? 0
                 Button {
                     if errSize < 100 * 1024 {
                         showStderr = true
