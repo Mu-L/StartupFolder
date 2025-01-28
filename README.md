@@ -17,6 +17,8 @@ The app creates a `Startup` folder in your home directory. Anything you place in
 
 You can place **apps**, **scripts**, **Shortcuts**, **links**, and really anything you want in the folder.
 
+![Startup Folder UI](https://lowtechguys.com/static/img/startupfolder-ui.png)
+
 #### How it works?
 
 > The app is designed to be as simple as possible. It runs a background agent that launches and keeps track of startup items.
