@@ -30,6 +30,9 @@ class AppDelegate: LowtechIndieAppDelegate {
     var mainWindow: NSWindow? {
         NSApp.windows.first { $0.title == "Startup Folder" }
     }
+    var settingsWindow: NSWindow? {
+        NSApp.windows.first { $0.title.contains("Settings") }
+    }
 
     override func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.disableRelaunchOnLogin()
@@ -151,6 +154,37 @@ class AppDelegate: LowtechIndieAppDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         SM.cleanup()
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if Defaults[.stopAskingOnQuit] {
+            if !Defaults[.quitDirectly] {
+                NSApp.setActivationPolicy(.accessory)
+                mainWindow?.close()
+                settingsWindow?.close()
+            }
+            return Defaults[.quitDirectly] ? .terminateNow : .terminateCancel
+        }
+
+        let alert = NSAlert()
+        alert.messageText = "Quit Application"
+        alert.informativeText = "Quitting the app will stop it from tracking the startup items runtime. Do you want the app to keep running in the background or quit completely?"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Keep running in the background")
+        alert.addButton(withTitle: "Quit")
+        alert.showsSuppressionButton = true
+
+        let response = alert.runModal()
+        Defaults[.stopAskingOnQuit] = alert.suppressionButton?.state == .on
+        Defaults[.quitDirectly] = response == .alertSecondButtonReturn
+        if response == .alertFirstButtonReturn {
+            NSApp.setActivationPolicy(.accessory)
+            mainWindow?.close()
+            settingsWindow?.close()
+            return .terminateCancel
+        } else {
+            return .terminateNow
+        }
     }
 
     func setupCleanup() {

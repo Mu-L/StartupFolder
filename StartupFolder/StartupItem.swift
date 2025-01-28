@@ -177,6 +177,8 @@ class StartupItem: Identifiable {
         return nil
     }()
 
+    var launched: Bool { status != .notStarted }
+
     var isNetLink: Bool {
         type == .link && (siteURL?.scheme?.starts(with: "http") ?? false)
     }
@@ -297,6 +299,14 @@ class StartupItem: Identifiable {
         case .other:
             launchWithWorkspace()
         }
+    }
+
+    func stop() async {
+        guard canTerminate else {
+            status = .notStarted
+            return
+        }
+        await terminate()
     }
 
     func terminate() async -> Bool {

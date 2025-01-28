@@ -41,6 +41,9 @@ struct FooterView: View {
             }
 
             Button {
+                if let clipboardURL = NSPasteboard.general.string(forType: .string)?.url {
+                    url = clipboardURL.absoluteString
+                }
                 showAddURL = true
             } label: {
                 Label("Add URL", systemImage: "link")
@@ -220,6 +223,23 @@ struct ContentView: View {
                     }
                     .pickerStyle(.menu)
                     .help("Choose the style for the buttons")
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        if startupManager.allLaunched {
+                            startupManager.stopStartupItems()
+                        } else {
+                            startupManager.launchStartupItems(delay: 0)
+                        }
+                    } label: {
+                        if startupManager.launchInProgress {
+                            ProgressView()
+                        } else if startupManager.allLaunched {
+                            Label("Stop all", systemImage: "stop.fill")
+                        } else {
+                            Label("Start all", systemImage: "play.fill")
+                        }
+                    }.help("\(startupManager.allLaunched ? "Stops" : "Launches") all the startup items right now")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button {

@@ -98,7 +98,20 @@ struct StartupItemView: View {
     @Environment(\.colorScheme) var colorScheme
 
     func outputView(_ text: String, path: FilePath?) -> some View {
-        VStack {
+        VStack(spacing: 5) {
+            HStack {
+                Button(action: {
+                    showStdout = false
+                    showStderr = false
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.heavy(7))
+                        .foregroundColor(.bg.warm)
+                }
+                .buttonStyle(FlatButton(color: .fg.warm.opacity(0.6), circle: true, horizontalPadding: 5, verticalPadding: 5))
+                .padding(.top, 8).padding(.leading, 8)
+                Spacer()
+            }
             ScrollView {
                 VStack {
                     Text(text)
@@ -108,7 +121,7 @@ struct StartupItemView: View {
                         .fill(.topLeading)
                 }.frame(maxWidth: .infinity)
             }
-            .padding()
+            .padding(.bottom).padding(.horizontal, 25)
             if let path {
                 Button("Open in editor") {
                     NSWorkspace.shared.open([path.url], withApplicationAt: Defaults[.editorApp], configuration: .init())

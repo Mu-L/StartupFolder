@@ -24,6 +24,10 @@ class StartupManager {
     @ObservationIgnored @Default(.startupFolderPath) var startupFolderPath
     var folders: [FilePath.ComponentView] = []
 
+    var launchInProgress = false
+
+    var allLaunched = false
+
     var startupItems: [StartupItem] = [] {
         didSet {
             categorize()
@@ -49,6 +53,7 @@ class StartupManager {
         linkItems = itemsToCategorize.filter { $0.type == .link }.sorted { $0.name < $1.name }
         otherItems = itemsToCategorize.filter { $0.type == .other }.sorted { $0.name < $1.name }
         shortcutItems = itemsToCategorize.filter { $0.type == .shortcut }.sorted { $0.name < $1.name }
+        allLaunched = itemsToCategorize.allSatisfy(\.launched)
     }
 
     func cleanup() {
@@ -140,14 +145,25 @@ class StartupManager {
         startupItems = mergedItems
     }
 
-    func launchStartupItems() {
-        if startupDelay > 0 {
+    func launchStartupItems(delay: TimeInterval? = nil) {
+        launchInProgress = true
+
+        if (delay ?? startupDelay) > 0 {
             mainAsyncAfter(startupDelay) {
                 self.runStartupItemsWithDelay()
             }
         } else {
             runStartupItemsWithDelay()
         }
+    }
+
+    func stopStartupItems() {
+        launchInProgress = true
+        for item in startupItems {
+            Task { await item.stop() }
+        }
+        launchInProgress = false
+        allLaunched = false
     }
 
     @ObservationIgnored @Default(.startupDelay) private var startupDelay
@@ -158,12 +174,19 @@ class StartupManager {
             for item in startupItems.sorted(by: \.name) {
                 item.launch()
             }
+            launchInProgress = false
+            allLaunched = true
             return
         }
 
+        let count = startupItems.count
         for (index, item) in startupItems.sorted(by: \.name).enumerated() {
             mainAsyncAfter(delayBetweenItems * index.d) {
                 item.launch()
+                if index == count - 1 {
+                    self.launchInProgress = false
+                    self.allLaunched = true
+                }
             }
         }
     }

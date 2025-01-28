@@ -35,7 +35,7 @@ struct SettingsView: View {
                     }
                 }
                 .toggleStyle(.button)
-                .buttonStyle(FlatButton(color: .primary.opacity(0.2), textColor: .primary))
+                .buttonStyle(FlatButton(color: .bg.warm.opacity(0.2), textColor: .primary))
                 .onHover { hovering in
                     hoveringAgent = hovering
                 }
