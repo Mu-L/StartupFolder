@@ -250,6 +250,9 @@ class AppDelegate: LowtechIndieAppDelegate {
         isSystemShuttingDown = true
     }
 
+    func updaterWillRelaunchApplication(_ updater: SPUUpdater) {
+        isSystemShuttingDown = true
+    }
 }
 
 func setupLaunchAtLogin(loadAgent: Bool? = nil) {

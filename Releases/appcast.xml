@@ -11,10 +11,10 @@
             <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:releaseNotesLink>https://files.lowtechguys.com/ReleaseNotes/StartupFolder-1.1.1.html</sparkle:releaseNotesLink>
-            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.1.1.dmg" length="3764837" type="application/octet-stream" sparkle:edSignature="5O9JHrvhfYhA9Efno2YB0fXHze9kb26TxH9NPdTsDxFonXZ8r5lQAkLYntZ8pqHbqmk1AhuYxpZyt/j08Z+JDA=="/>
+            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.1.1.dmg" length="3765646" type="application/octet-stream" sparkle:edSignature="o8ABKLVuMGcexXTlpXlBWc8zHslAeOTMBv+wmrtKClukgBT1AZGX0alkMzTpL8XkbJNhrDGZxpGbCHXmWZPODQ=="/>
             <sparkle:deltas>
-                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.1-1.1.delta" sparkle:deltaFrom="1.1" length="221746" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="ps+ZdF/rqcPLYZMR3pVNGkMeG6GIMahuC6fV9tqbcA9DlegwrrRFjIdPWw+InwJ3n95a2p3ffWr31n25gQfBAw=="/>
-                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.1-1.delta" sparkle:deltaFrom="1" length="276294" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="8z0oqKpxdWqRWzTjPNnPVVoYVU6WEB5h/ncsaqxfsXp/kPfGNT+PDnW247Qv3yE5MzwiQ/hlKXIbVoXQ9SBUBQ=="/>
+                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.1-1.1.delta" sparkle:deltaFrom="1.1" length="222178" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="0dggeEfVOxnz3z6dV5lLtyLWrpV4zjiAyqoSUMTDkGgLJRBF3ejTigLQhNxWyEoTH2TP1XjUrMlz3wety9jmDA=="/>
+                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.1-1.delta" sparkle:deltaFrom="1" length="276458" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="TySMoRHqM5ZdNI1FcxZxKcUiI9gqSlGR1X7RqKIYu/WlaQmK8OXx4eJZM+qFBLjTFmP2bSor6au2WxZHndgIDg=="/>
             </sparkle:deltas>
         </item>
         <item>
