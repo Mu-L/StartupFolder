@@ -30,6 +30,14 @@ struct StartupItemView: View {
             keepAlive[item.bundleIdentifier ?? item.path] = $0
         }
     }
+    @Default(.keepAliveMode) var keepAliveMode: [String: KeepAliveMode]
+    var keepAliveModeBinding: Binding<KeepAliveMode> {
+        Binding {
+            keepAliveMode[item.bundleIdentifier ?? item.path] ?? .onFail
+        } set: {
+            keepAliveMode[item.bundleIdentifier ?? item.path] = $0
+        }
+    }
 
     var status: some View {
         HStack {
@@ -55,6 +63,18 @@ struct StartupItemView: View {
                 }
                 Toggle("Keep alive", isOn: keepAliveBinding)
                     .help("Restart the item if it crashes or fails to run. If the item crashes more than 5 times in 30 seconds, restarting will be stopped.")
+
+                if keepAlive[item.bundleIdentifier ?? item.path] ?? false, item.type != .app {
+                    Picker("", selection: keepAliveModeBinding) {
+                        ForEach(KeepAliveMode.allCases) { mode in
+                            Text(mode.text)
+                                .tag(mode)
+                                .help(mode.help)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .fixedSize()
+                }
             }
 
             Spacer()

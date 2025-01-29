@@ -75,4 +75,35 @@ extension Defaults.Keys {
     static let showWindowAtStartup = Key<Bool>("showWindowAtStartup", default: false)
     static let hideAppOnLaunch = Key<[String: Bool]>("hideAppOnLaunch", default: [:])
     static let keepAlive = Key<[String: Bool]>("keepAlive", default: [:])
+    static let keepAliveMode = Key<[String: KeepAliveMode]>("keepAliveMode", default: [:])
+}
+
+enum KeepAliveMode: String, CaseIterable, Identifiable, Defaults.Serializable {
+    case onFail
+    case onSuccess
+    case always
+
+    var id: String { rawValue }
+
+    var text: String {
+        switch self {
+        case .onFail:
+            "On fail"
+        case .onSuccess:
+            "On success"
+        case .always:
+            "Always"
+        }
+    }
+
+    var help: String {
+        switch self {
+        case .onFail:
+            "Restart the app only if it crashes or exits with a non-zero status code"
+        case .onSuccess:
+            "Restart the app only if it exits successfully with a zero status code"
+        case .always:
+            "Always restart the item, unless it is manually stopped from this app"
+        }
+    }
 }

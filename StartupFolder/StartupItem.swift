@@ -191,6 +191,8 @@ class StartupItem: Identifiable, CustomStringConvertible {
     @ObservationIgnored var observers: [AnyCancellable] = []
     @ObservationIgnored var appTerminatedObserver: AnyCancellable?
 
+    var ignoreKeepAlive: ExpiringBool = false
+
     var url: URL {
         didSet {
             path = url.path
@@ -201,7 +203,16 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
     var status: ExecutionStatus = .notStarted {
         didSet {
-            if status == .failed, canBeKeptAlive {
+            guard !ignoreKeepAlive.value, canBeKeptAlive else {
+                return
+            }
+            if status == .failed, (Defaults[.keepAliveMode][bundleIdentifier ?? path] ?? .onFail) != .onSuccess {
+                handleKeepAlive()
+            }
+            if status == .succeeded, (Defaults[.keepAliveMode][bundleIdentifier ?? path] ?? .onFail) != .onFail {
+                handleKeepAlive()
+            }
+            if status == .terminated, oldValue == .running, type == .app {
                 handleKeepAlive()
             }
         }
@@ -284,11 +295,10 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
     func setAppTerminated() {
         if status != .terminated {
-            status = .succeeded
+            status = .terminated
             endTime = Date()
         }
         app = nil
-
     }
 
     func fetchProcessInfo(url: URL, type: StartupItemType) {
@@ -421,6 +431,8 @@ class StartupItem: Identifiable, CustomStringConvertible {
         isTerminating = true
         defer { isTerminating = false }
 
+        ignoreKeepAlive.set(true, expireAfter: 7)
+
         if let app {
             app.terminate()
         } else if let process {
@@ -430,10 +442,18 @@ class StartupItem: Identifiable, CustomStringConvertible {
         }
 
         if await (waitUntilTerminated(for: 3)) {
-            status = .terminated
+            withoutKeepAlive {
+                status = .terminated
+            }
             return true
         }
         return false
+    }
+
+    func withoutKeepAlive(action: () -> Void) {
+        ignoreKeepAlive.set(true, expireAfter: nil)
+        action()
+        ignoreKeepAlive.set(false, expireAfter: nil)
     }
 
     func restart() async -> Bool {
@@ -443,6 +463,8 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
         isTerminating = true
         defer { isTerminating = false }
+
+        ignoreKeepAlive.set(true, expireAfter: 7)
 
         if let app {
             app.terminate()
@@ -486,16 +508,18 @@ class StartupItem: Identifiable, CustomStringConvertible {
     }
 
     func forceTerminate() {
-        if let app {
-            app.forceTerminate()
-            status = .terminated
-        } else if let process {
-            let pid = process.processIdentifier
-            kill(pid, SIGKILL)
-            status = .terminated
-        } else if let pid {
-            kill(pid, SIGKILL)
-            status = .terminated
+        withoutKeepAlive {
+            if let app {
+                app.forceTerminate()
+                status = .terminated
+            } else if let process {
+                let pid = process.processIdentifier
+                kill(pid, SIGKILL)
+                status = .terminated
+            } else if let pid {
+                kill(pid, SIGKILL)
+                status = .terminated
+            }
         }
         isTerminating = false
     }
@@ -548,6 +572,9 @@ class StartupItem: Identifiable, CustomStringConvertible {
                 guard let bundleID = self.bundleIdentifier else { return }
                 if Defaults[.hideAppOnLaunch][bundleID] == true {
                     app.hide()
+                    mainAsyncAfter(1) { app.hide() }
+                    mainAsyncAfter(2) { app.hide() }
+                    mainAsyncAfter(3) { app.hide() }
                 }
             }
         }

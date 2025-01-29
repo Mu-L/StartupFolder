@@ -94,10 +94,7 @@ class AppDelegate: LowtechIndieAppDelegate {
                 guard let item = SM.startupItems.first(where: { $0.app?.processIdentifier == terminatedApp.processIdentifier }) else {
                     continue
                 }
-                if item.status != .terminated {
-                    item.status = .succeeded
-                }
-                item.app = nil
+                item.setAppTerminated()
             }
 
             for app in newApps {
@@ -107,7 +104,6 @@ class AppDelegate: LowtechIndieAppDelegate {
                 item.app = app
                 if app.isTerminated {
                     item.setAppTerminated()
-                    item.endTime = Date()
                 } else {
                     item.app = app
                     item.startTime = app.launchDate
