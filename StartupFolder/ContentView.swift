@@ -20,6 +20,8 @@ struct FooterView: View {
             } label: {
                 Label("Open Startup Folder", systemImage: "folder.fill")
             }
+            .keyboardShortcut("o", modifiers: [.command, .shift])
+            .help("Opens the startup folder in Finder (Cmd+Shift+O)")
 
             Spacer()
 
@@ -39,6 +41,8 @@ struct FooterView: View {
             } label: {
                 Label("Add App", systemImage: "app.badge.fill")
             }
+            .keyboardShortcut("a", modifiers: [.command, .shift])
+            .help("Opens an app picker to add to the startup folder (Cmd+Shift+A)")
 
             Button {
                 if let clipboardURL = NSPasteboard.general.string(forType: .string)?.url {
@@ -48,18 +52,24 @@ struct FooterView: View {
             } label: {
                 Label("Add URL", systemImage: "link")
             }
+            .keyboardShortcut("u", modifiers: [.command, .shift])
+            .help("Adds a URL to the startup folder (Cmd+Shift+U)")
 
             Button {
                 showAddScript = true
             } label: {
                 Label("Add Script", systemImage: "apple.terminal")
             }
+            .keyboardShortcut("s", modifiers: [.command, .shift])
+            .help("Creates a script in the startup folder (Cmd+Shift+S)")
 
             Button {
                 showAddShortcut = true
             } label: {
                 Label("Add Shortcut", systemImage: "bolt.fill")
             }
+            .keyboardShortcut("k", modifiers: [.command, .shift])
+            .help("Opens a Shortcut picker to add to the startup folder (Cmd+Shift+K)")
         }
         .padding(.horizontal)
         .sheet(isPresented: $showAddURL, onDismiss: addURL) {
@@ -174,6 +184,13 @@ struct ContentView: View {
                     }
                 }
             }
+            if !startupManager.shortcutItems.isEmpty {
+                Section(header: Text("Shortcuts")) {
+                    ForEach(startupManager.shortcutItems) { item in
+                        StartupItemView(item: item)
+                    }
+                }
+            }
             if !startupManager.otherItems.isEmpty {
                 Section(header: Text("Other")) {
                     ForEach(startupManager.otherItems) { item in
@@ -188,17 +205,18 @@ struct ContentView: View {
                     }
                 }
             }
-            if !startupManager.shortcutItems.isEmpty {
-                Section(header: Text("Shortcuts")) {
-                    ForEach(startupManager.shortcutItems) { item in
-                        StartupItemView(item: item)
-                    }
-                }
-            }
         }.listStyle(.inset)
     }
 
     var body: some View {
+        if startupManager.windowClosed {
+            EmptyView()
+        } else {
+            content
+        }
+    }
+
+    var content: some View {
         NavigationSplitView {
             SidebarView()
                 .labelStyle(.iconOnly)
@@ -255,13 +273,18 @@ struct ContentView: View {
                         startupManager.loadStartupItems()
                     } label: {
                         Label("Reload", systemImage: "arrow.clockwise")
-                    }.help("Reloads the startup items from the folder")
+                    }
+                    .keyboardShortcut("r", modifiers: [.command])
+                    .help("Reloads the startup items from the folder")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     SettingsLink().labelStyle(.iconOnly)
                 }
             }
             .onDisappear {
+                if let delegate = AppDelegate.shared, delegate.isSystemShuttingDown {
+                    return
+                }
                 if let delegate = AppDelegate.shared, delegate.isLaunchedAtLogin {
                     delegate.isLaunchedAtLogin = false
                     return

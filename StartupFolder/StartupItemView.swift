@@ -9,8 +9,31 @@ struct StartupItemView: View {
     @State var item: StartupItem
     @State var runtime: String?
 
+    @State var showSettings = SWIFTUI_PREVIEW
+    @State var hoveringSettings = false
+
+    @Default(.hideAppOnLaunch) var hideAppOnLaunch: [String: Bool]
+    var hideOnLaunch: Binding<Bool> {
+        Binding {
+            item.bundleIdentifier.map { id in hideAppOnLaunch[id] ?? false } ?? false
+        } set: {
+            guard let id = item.bundleIdentifier else { return }
+            hideAppOnLaunch[id] = $0
+        }
+    }
+
+    @Default(.keepAlive) var keepAlive: [String: Bool]
+    var keepAliveBinding: Binding<Bool> {
+        Binding {
+            keepAlive[item.bundleIdentifier ?? item.path] ?? false
+        } set: {
+            keepAlive[item.bundleIdentifier ?? item.path] = $0
+        }
+    }
+
     var status: some View {
         HStack {
+            Text(" ").monospacedDigit()
             if let code = item.exitCode {
                 Text("Exit Code: \(code)").monospacedDigit()
             }
@@ -18,6 +41,75 @@ struct StartupItemView: View {
                 Text("Run time: \(duration)").monospacedDigit()
             }
         }.font(.caption).foregroundStyle(.secondary)
+    }
+
+    var settings: some View {
+        HStack {
+            if item.type == .app {
+                Toggle("Hide on launch", isOn: hideOnLaunch)
+                    .help("Launch the app in hidden mode (without showing the window)")
+            }
+            if item.canBeKeptAlive {
+                if item.type == .app {
+                    Divider()
+                }
+                Toggle("Keep alive", isOn: keepAliveBinding)
+                    .help("Restart the item if it crashes or fails to run. If the item crashes more than 5 times in 30 seconds, restarting will be stopped.")
+            }
+
+            Spacer()
+
+            status
+
+        }
+        .controlSize(.small)
+        .font(.round(11))
+        .foregroundStyle(.primary.opacity(0.8))
+        .fill(.leading)
+        .roundbg(radius: 5, verticalPadding: 5, horizontalPadding: 10, color: .gray.opacity(0.05))
+        .background(
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(
+                    .shadow(.inner(color: .gray, radius: 2, x: 2, y: 2))
+                        .shadow(.inner(color: .gray, radius: 2, x: -2, y: -2))
+
+                )
+                .foregroundColor(.gray.opacity(0.1))
+        )
+        .overlay(roundRect(5, stroke: .gray.opacity(0.3), lineWidth: 1))
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.1)) {
+                hoveringSettings = hovering
+            }
+        }
+        .opacity(hoveringSettings ? 1 : 0.5)
+    }
+
+    @ViewBuilder
+    var itemStatus: some View {
+        HStack {
+            if item.isTerminating || item.launching {
+                ProgressView().controlSize(.small)
+            }
+            Text(item.isTerminating ? "Terminating..." : (item.launching ? "Launching..." : item.status.text))
+                .roundbg(
+                    radius: 7, verticalPadding: 2, horizontalPadding: 8,
+                    color: item.isTerminating ? .red : item.launching ? .orange : item.status.color.opacity(0.8), noFG: true
+                )
+                .foregroundStyle(.white)
+                .font(.round(11))
+                .opacity(0.75)
+
+            if item.type != .link, item.type != .shortcut, item.type != .other {
+                Toggle(isOn: $showSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.round(11))
+                        .foregroundColor(.fg.warm)
+                }
+                .toggleStyle(.button)
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     var body: some View {
@@ -53,19 +145,13 @@ struct StartupItemView: View {
                 Spacer()
 
                 if !item.isTrashed {
-                    if item.isTerminating || item.launching {
-                        ProgressView().controlSize(.small)
-                    }
-                    Text(item.isTerminating ? "Terminating..." : (item.launching ? "Launching..." : item.status.text))
-                        .roundbg(
-                            radius: 7, verticalPadding: 2, horizontalPadding: 8,
-                            color: item.isTerminating ? .red : item.launching ? .orange : item.status.color.opacity(0.8), noFG: true
-                        )
-                        .foregroundStyle(.white)
-                        .font(.round(11))
-                        .opacity(0.75)
+                    itemStatus
                 }
-            }.padding(.bottom, 10)
+            }.padding(.bottom, 5)
+
+            if showSettings {
+                settings
+            }
 
             HStack {
                 if item.isTrashed {
@@ -79,13 +165,7 @@ struct StartupItemView: View {
                         .font(.round(11))
                         .fixedSize()
                     Spacer()
-                    if labelStyle != .titleAndIcon {
-                        status
-                    }
                 }
-            }
-            if labelStyle == .titleAndIcon {
-                status
             }
 
         }
@@ -96,11 +176,19 @@ struct StartupItemView: View {
         .sheet(isPresented: $showStderr) {
             outputView(item.readStderr() ?? "", path: item.stderrFilePath)
         }
-        .onReceive(timer) { _ in
+        .onChange(of: showSettings) {
             runtime = durationText()
         }
+        .onChange(of: item.status) {
+            runtime = durationText()
+        }
+        .onAppear {
+            if showSettings {
+                runtime = durationText()
+            }
+        }
     }
-    @Default(.labelStyle) private var labelStyle
+
     @Environment(\.colorScheme) var colorScheme
 
     func outputView(_ text: String, path: FilePath?) -> some View {
@@ -136,8 +224,6 @@ struct StartupItemView: View {
             }
         }.frame(width: 600, height: 300, alignment: .topLeading)
     }
-
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var trashedActions: some View {
         HStack {
@@ -226,7 +312,7 @@ struct StartupItemView: View {
         }
     }
 
-    func durationText() -> String? {
+    func durationText(endDate: Date? = nil) -> String? {
         guard let start = item.startTime else {
             return nil
         }
@@ -234,7 +320,7 @@ struct StartupItemView: View {
             return nil
         }
 
-        let end = item.endTime ?? Date()
+        let end = item.endTime ?? endDate ?? Date()
         let duration = end.timeIntervalSince(start)
         return if duration < 1 {
             "\((duration * 1000).intround) ms"

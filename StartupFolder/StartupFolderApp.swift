@@ -17,10 +17,6 @@ import SwiftUI
 import System
 
 class AppDelegate: LowtechIndieAppDelegate {
-    deinit {
-        NSWorkspace.shared.removeObserver(self, forKeyPath: #keyPath(NSWorkspace.runningApplications))
-    }
-
     static var shared: AppDelegate? { NSApp.delegate as? AppDelegate }
 
     var window: NSWindow?
@@ -28,6 +24,8 @@ class AppDelegate: LowtechIndieAppDelegate {
     // if env contains login=true
     var isLaunchedAtLogin = ProcessInfo.processInfo.environment["login"] == "true"
     var launchTimestamp = Date()
+
+    var isSystemShuttingDown = false
 
     var mainWindow: NSWindow? {
         NSApp.windows.first { $0.title == "Startup Folder" }
@@ -72,9 +70,10 @@ class AppDelegate: LowtechIndieAppDelegate {
             startShortcutWatcher()
         }
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(applicationDidTerminate(_:)), name: NSWorkspace.didTerminateApplicationNotification, object: nil)
-        NSWorkspace.shared.addObserver(self, forKeyPath: #keyPath(NSWorkspace.runningApplications), options: [.new, .old], context: nil)
+        NSWorkspace.shared.addObserver(self, forKeyPath: #keyPath(NSWorkspace.runningApplications), options: [.new, .old, .prior], context: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(windowDidBecomeMain(_:)), name: NSWindow.didBecomeMainNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(willCloseNotification(_:)), name: NSWindow.willCloseNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(systemWillPowerOff(_:)), name: NSWorkspace.willPowerOffNotification, object: nil)
     }
 
     override func applicationDidBecomeActive(_ notification: Notification) {
@@ -87,11 +86,9 @@ class AppDelegate: LowtechIndieAppDelegate {
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(NSWorkspace.runningApplications) {
-            guard let oldApps = change?[.oldKey] as? [NSRunningApplication],
-                  let newApps = change?[.newKey] as? [NSRunningApplication]
-            else {
-                return
-            }
+            let oldApps = change?[.oldKey] as? [NSRunningApplication] ?? []
+            let newApps = change?[.newKey] as? [NSRunningApplication] ?? []
+
             let terminatedApps = oldApps.filter { !newApps.contains($0) }
             for terminatedApp in terminatedApps {
                 guard let item = SM.startupItems.first(where: { $0.app?.processIdentifier == terminatedApp.processIdentifier }) else {
@@ -101,6 +98,21 @@ class AppDelegate: LowtechIndieAppDelegate {
                     item.status = .succeeded
                 }
                 item.app = nil
+            }
+
+            for app in newApps {
+                guard let item = SM.startupItems.first(where: { $0.bundleIdentifier == app.bundleIdentifier }) else {
+                    continue
+                }
+                item.app = app
+                if app.isTerminated {
+                    item.setAppTerminated()
+                    item.endTime = Date()
+                } else {
+                    item.app = app
+                    item.startTime = app.launchDate
+                    item.status = .running
+                }
             }
         }
     }
@@ -163,6 +175,9 @@ class AppDelegate: LowtechIndieAppDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if isSystemShuttingDown {
+            return .terminateNow
+        }
         if Defaults[.stopAskingOnQuit] {
             if !Defaults[.quitDirectly] {
                 NSApp.setActivationPolicy(.accessory)
@@ -213,12 +228,14 @@ class AppDelegate: LowtechIndieAppDelegate {
     @objc func windowDidBecomeMain(_ notification: Notification) {
         if let window = notification.object as? NSWindow, window.title == "Startup Folder" {
             NSApp.setActivationPolicy(.regular)
+            SM.windowClosed = false
         }
     }
 
     @objc func willCloseNotification(_ notification: Notification) {
-        if let window = notification.object as? NSWindow, window.title == "Startup Folder" {
+        if let window = notification.object as? NSWindow, window.title == "Startup Folder", window.contentView != nil {
             NSApp.setActivationPolicy(.accessory)
+            SM.windowClosed = true
         }
     }
 
@@ -228,12 +245,13 @@ class AppDelegate: LowtechIndieAppDelegate {
         }
         for item in SM.startupItems {
             if item.app?.processIdentifier == terminatedApp.processIdentifier {
-                if item.status != .terminated {
-                    item.status = .succeeded
-                }
-                item.app = nil
+                item.setAppTerminated()
             }
         }
+    }
+
+    @objc func systemWillPowerOff(_ notification: Notification) {
+        isSystemShuttingDown = true
     }
 
 }
@@ -282,12 +300,12 @@ struct StartupFolderApp: App {
                 .frame(minWidth: 800, minHeight: 200)
         }
         .defaultSize(width: 800, height: 750)
-        .commands {
-            CommandMenu("StartupFolder") {
-                Button("Check for Updates") {
+        .commandsReplaced {
+            CommandGroup(after: .help) {
+                Button("Check for updates (current version: v\(Bundle.main.version))") {
                     UM.updater?.checkForUpdates()
                 }
-                .keyboardShortcut("U", modifiers: [.command, .shift])
+                .keyboardShortcut("U", modifiers: [.command])
             }
         }
         .onChange(of: wm.windowToOpen) {

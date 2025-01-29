@@ -5,6 +5,7 @@
 //  Created by Alin Panaitiu on 25.01.2025.
 //
 
+import Combine
 import Defaults
 import FaviconFinder
 import Foundation
@@ -21,7 +22,7 @@ extension URL {
 
 @Observable
 class StartupItem: Identifiable, CustomStringConvertible {
-    init(url: URL, folder: FilePath.ComponentView? = nil) {
+    init(url: URL, folder: FilePath.ComponentView? = nil, startProcessInfoFetching: Bool = true) {
         self.url = url
         self.folder = folder
         name = url.lastPathComponent
@@ -47,8 +48,10 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
         let url = url
         let type = type
-        asyncNow { [weak self] in
-            self?.fetchProcessInfo(url: url, type: type)
+        if startProcessInfoFetching {
+            asyncNow { [weak self] in
+                self?.fetchProcessInfo(url: url, type: type)
+            }
         }
     }
 
@@ -125,23 +128,18 @@ class StartupItem: Identifiable, CustomStringConvertible {
     var stdoutFilePath: FilePath? = nil
     var stderrFilePath: FilePath? = nil
 
-    var url: URL
     var name: String
     var type: StartupItemType
-    var status: ExecutionStatus = .notStarted
     var exitCode: Int32?
     var startTime: Date?
     var endTime: Date?
-    var app: NSRunningApplication?
     var isTrashed = false
     var shortcut: Shortcut?
-
     var isTerminating = false
-
     var icon: NSImage? = nil
 
     @ObservationIgnored lazy var utType: UTType? = {
-        if type == .script, url.pathExtension.isEmpty {
+        if type == .script, ext.isEmpty {
             guard let fileHandle = try? FileHandle(forReadingFrom: url),
                   let firstLine = String(data: fileHandle.readData(ofLength: 1024), encoding: .utf8)?.components(separatedBy: .newlines).first,
                   firstLine.hasPrefix("#!")
@@ -162,7 +160,7 @@ class StartupItem: Identifiable, CustomStringConvertible {
         guard type == .link else {
             return nil
         }
-        if url.pathExtension == "webloc" {
+        if ext == "webloc" {
             guard let data = try? Data(contentsOf: url),
                   let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
                   let siteURLString = plist["URL"] as? String,
@@ -171,7 +169,7 @@ class StartupItem: Identifiable, CustomStringConvertible {
                 return nil
             }
             return siteURL
-        } else if ["link", "txt", "url"].contains(url.pathExtension) {
+        } else if ["link", "txt", "url"].contains(ext) {
             guard let content = try? String(contentsOf: url).trimmed,
                   let siteURL = URL(string: content)
             else {
@@ -185,6 +183,32 @@ class StartupItem: Identifiable, CustomStringConvertible {
     var pid: Int32? = nil
 
     var launching = false
+
+    @ObservationIgnored lazy var bundleIdentifier: String? = app?.bundleIdentifier ?? Bundle(url: url)?.bundleIdentifier
+    @ObservationIgnored lazy var path: String = url.path
+    @ObservationIgnored lazy var ext: String = url.pathExtension
+    @ObservationIgnored lazy var id = "\(path)-\(type)"
+    @ObservationIgnored var observers: [AnyCancellable] = []
+    @ObservationIgnored var appTerminatedObserver: AnyCancellable?
+
+    var url: URL {
+        didSet {
+            path = url.path
+            ext = url.pathExtension
+            id = "\(path)-\(type)"
+        }
+    }
+
+    var status: ExecutionStatus = .notStarted {
+        didSet {
+            if status == .failed, canBeKeptAlive {
+                handleKeepAlive()
+            }
+        }
+    }
+    var canBeKeptAlive: Bool {
+        type == .app || type == .binary || type == .script
+    }
 
     var description: String {
         "\(name) - \(type.text) - \(status.text)"
@@ -214,32 +238,57 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
     var isRunning: Bool { status == .running }
 
-    var id: String { "\(url.path)-\(type)" }
-
     var canTerminate: Bool {
         status == .running && (app.map { !$0.isTerminated } ?? process?.isRunning ?? (pid != nil))
     }
 
+    @ObservationIgnored var app: NSRunningApplication? {
+        willSet {
+            appTerminatedObserver?.cancel()
+            appTerminatedObserver = nil
+        }
+        didSet {
+            appTerminatedObserver = app?.publisher(for: \.isTerminated)
+                .drop(while: { terminated in !terminated })
+                .sink { [weak self] _ in
+                    self?.appTerminatedObserver?.cancel()
+                    self?.appTerminatedObserver = nil
+                    self?.setAppTerminated()
+                }
+        }
+    }
+
     static func determineType(of url: URL) -> StartupItemType {
-        if url.pathExtension == "app" || (url.resolvingAliasOrSymlink).pathExtension == "app" {
+        let ext = url.pathExtension
+
+        return if ext == "app" || (url.resolvingAliasOrSymlink).pathExtension == "app" {
             .app
-        } else if ["webloc", "link", "txt", "url"].contains(url.pathExtension) {
+        } else if ["webloc", "link", "txt", "url"].contains(ext) {
             if let _ = try? String(contentsOf: url).url {
                 .link
             } else {
                 .other
             }
-        } else if url.pathExtension == "shortcut" {
+        } else if ext == "shortcut" {
             .shortcut
         } else if url.isExecutable(), !url.isBinary() {
             .script
         } else if url.isExecutable() {
             .binary
-        } else if let _ = ScriptRunner(fromExtension: url.pathExtension) {
+        } else if let _ = ScriptRunner(fromExtension: ext) {
             .script
         } else {
             .other
         }
+    }
+
+    func setAppTerminated() {
+        if status != .terminated {
+            status = .succeeded
+            endTime = Date()
+        }
+        app = nil
+
     }
 
     func fetchProcessInfo(url: URL, type: StartupItemType) {
@@ -451,9 +500,35 @@ class StartupItem: Identifiable, CustomStringConvertible {
         isTerminating = false
     }
 
+    private var terminationTimestamps: [Date] = []
+
+    private func handleKeepAlive() {
+        terminationTimestamps.append(Date())
+        terminationTimestamps = terminationTimestamps.filter { $0.timeIntervalSinceNow > -30 }
+
+        if terminationTimestamps.count > 5 {
+            log.error("Crash loop detected for \(name). Not restarting.")
+            return
+        }
+
+        if Defaults[.keepAlive][bundleIdentifier ?? path] == true {
+            log.info("Restarting \(name) in 3 seconds due to keep alive setting.")
+            mainAsyncAfter(3) { [weak self] in
+                self?.launch()
+            }
+        }
+    }
+
     private func launchApp() {
         status = .running
-        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration()) { app, error in
+
+        let config = NSWorkspace.OpenConfiguration()
+        if let id = bundleIdentifier {
+            config.activates = Defaults[.hideAppOnLaunch][id] != true
+            config.hides = Defaults[.hideAppOnLaunch][id] == true
+        }
+
+        NSWorkspace.shared.openApplication(at: url, configuration: config) { app, error in
             mainAsync {
                 if let error {
                     self.status = .failed
@@ -466,7 +541,14 @@ class StartupItem: Identifiable, CustomStringConvertible {
                 }
 
                 self.status = app.isTerminated ? .succeeded : .running
+                self.startTime = app.launchDate
+                self.endTime = app.isTerminated ? Date() : nil
                 self.app = app
+
+                guard let bundleID = self.bundleIdentifier else { return }
+                if Defaults[.hideAppOnLaunch][bundleID] == true {
+                    app.hide()
+                }
             }
         }
     }
@@ -478,10 +560,10 @@ class StartupItem: Identifiable, CustomStringConvertible {
                 return
             }
             process = shellProc("/usr/bin/shortcuts", args: ["run", shortcut.identifier ?! shortcut.name])
-        } else if type == .script, !url.isExecutable(), let scriptRunner = ScriptRunner(fromExtension: url.pathExtension) {
-            process = shellProc(scriptRunner.path, args: [url.path])
+        } else if type == .script, !url.isExecutable(), let scriptRunner = ScriptRunner(fromExtension: ext) {
+            process = shellProc(scriptRunner.path, args: [path])
         } else {
-            process = shellProc(url.path, args: [])
+            process = shellProc(path, args: [])
         }
         guard let process else {
             status = .failed

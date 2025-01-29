@@ -73,4 +73,6 @@ extension Defaults.Keys {
     static let stopAskingOnQuit = Key<Bool>("stopAskingOnQuit", default: false)
     static let quitDirectly = Key<Bool>("quitDirectly", default: false)
     static let showWindowAtStartup = Key<Bool>("showWindowAtStartup", default: false)
+    static let hideAppOnLaunch = Key<[String: Bool]>("hideAppOnLaunch", default: [:])
+    static let keepAlive = Key<[String: Bool]>("keepAlive", default: [:])
 }

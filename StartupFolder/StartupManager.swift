@@ -11,8 +11,29 @@ import Lowtech
 import SwiftUI
 import System
 
+extension FilePath.ComponentView: @retroactive Comparable {
+    public static func < (lhs: FilePath.ComponentView, rhs: FilePath.ComponentView) -> Bool {
+        lhs.string.lowercased() < rhs.string.lowercased()
+    }
+}
+
+extension StartupItem: Comparable, Equatable {
+    public static func < (lhs: StartupItem, rhs: StartupItem) -> Bool {
+        lhs.name.lowercased() < rhs.name.lowercased()
+    }
+
+    public static func == (lhs: StartupItem, rhs: StartupItem) -> Bool {
+        lhs.url == rhs.url
+    }
+}
+
 @Observable
 class StartupManager {
+    init() {
+        startProcessCheckTimer()
+    }
+
+    var windowClosed = false
     var recentlyDeletedStartupItems: [StartupItem] = []
     var appItems: [StartupItem] = []
     var scriptItems: [StartupItem] = []
@@ -32,6 +53,10 @@ class StartupManager {
     var launchWorkItems: [DispatchWorkItem] = []
     var stopTask: Task<Void, Never>?
 
+    var fetchProcessInfoWorkItems: [DispatchWorkItem] = []
+
+    var processCheckTimer: Timer?
+
     var startupItems: [StartupItem] = [] {
         didSet {
             categorize()
@@ -48,15 +73,15 @@ class StartupManager {
         folders = startupItems
             .compactMap(\.folder)
             .uniqued
-            .sorted(by: \.string)
+            .sorted()
 
         let itemsToCategorize = filteredStartupItems ?? startupItems
-        appItems = itemsToCategorize.filter { $0.type == .app }.sorted { $0.name < $1.name }
-        scriptItems = itemsToCategorize.filter { $0.type == .script }.sorted { $0.name < $1.name }
-        binaryItems = itemsToCategorize.filter { $0.type == .binary }.sorted { $0.name < $1.name }
-        linkItems = itemsToCategorize.filter { $0.type == .link }.sorted { $0.name < $1.name }
-        otherItems = itemsToCategorize.filter { $0.type == .other }.sorted { $0.name < $1.name }
-        shortcutItems = itemsToCategorize.filter { $0.type == .shortcut }.sorted { $0.name < $1.name }
+        appItems = itemsToCategorize.filter { $0.type == .app }.sorted()
+        scriptItems = itemsToCategorize.filter { $0.type == .script }.sorted()
+        binaryItems = itemsToCategorize.filter { $0.type == .binary }.sorted()
+        linkItems = itemsToCategorize.filter { $0.type == .link }.sorted()
+        otherItems = itemsToCategorize.filter { $0.type == .other }.sorted()
+        shortcutItems = itemsToCategorize.filter { $0.type == .shortcut }.sorted()
         allLaunched = itemsToCategorize.allSatisfy(\.launched)
     }
 
@@ -132,7 +157,7 @@ class StartupManager {
                     folder = FilePath.ComponentView(subfolder)
                 }
             }
-            newItems.append(StartupItem(url: file, folder: folder))
+            newItems.append(StartupItem(url: file, folder: folder, startProcessInfoFetching: false))
         }
 
         var mergedItems: [StartupItem] = []
@@ -147,6 +172,12 @@ class StartupManager {
             }
         }
         startupItems = mergedItems
+        for item in fetchProcessInfoWorkItems {
+            item.cancel()
+        }
+        fetchProcessInfoWorkItems = startupItems.map { item in
+            asyncNow { item.fetchProcessInfo(url: item.url, type: item.type) }
+        }
     }
 
     func launchStartupItems(delay: TimeInterval? = nil) {
@@ -195,7 +226,7 @@ class StartupManager {
 
     private func runStartupItemsWithDelay() {
         guard delayBetweenItems > 0 else {
-            for item in startupItems.sorted(by: \.name) {
+            for item in startupItems.sorted() {
                 item.launch()
             }
             launchInProgress = false
@@ -204,7 +235,7 @@ class StartupManager {
         }
 
         let count = startupItems.count
-        for (index, item) in startupItems.sorted(by: \.name).enumerated() {
+        for (index, item) in startupItems.sorted().enumerated() {
             let workItem = mainAsyncAfter(delayBetweenItems * index.d) {
                 item.launch()
                 if index == count - 1 {
@@ -213,6 +244,22 @@ class StartupManager {
                 }
             }
             launchWorkItems.append(workItem)
+        }
+    }
+
+    private func startProcessCheckTimer() {
+        processCheckTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [self] _ in
+            checkRunningProcesses()
+        }
+        processCheckTimer?.tolerance = 60.0
+    }
+
+    private func checkRunningProcesses() {
+        for item in startupItems {
+            if let pid = item.pid, item.app == nil, item.process == nil, kill(pid, 0) != 0 {
+                item.status = .terminated
+                item.pid = nil
+            }
         }
     }
 
