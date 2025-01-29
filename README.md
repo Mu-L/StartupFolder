@@ -34,3 +34,26 @@ You can place **apps**, **scripts**, **Shortcuts**, **links**, and really anythi
 - **scripts** can be written directly inside the folder
 
 The app also provides a convenient interface that helps you *choose apps*, *pick Shortcuts*, *create scripts* and manage the startup items.
+
+
+### Launch apps hidden
+
+Startup Folder can launch apps **hidden** at startup, and also force hide those apps that insist on showing a window anyway.
+
+This is useful for apps that you want to have available in the background for when you'll use them later.
+
+
+### Keep alive
+
+![keep alive modes](https://files.lowtechguys.com/startupfolder-keep-alive-modes_2.png)
+
+The app can keep apps and scripts alive by **relaunching** them if they crash. This is useful for apps that are not well-behaved and crash often.
+
+A **crash loop detection** mechanism is built-in to detect when an app or script crashes too often and stop relaunching it.
+
+
+### Efficient logging
+
+Script logs are kept in a separate temporary file for each script. This way, memory is not clogged with logs from previous runs and files will be automatically deleted by the OS when needed or after a reboot.
+
+Logs can be viewed directly from the app interface, with separate buttons for `stdout` and `stderr`.
