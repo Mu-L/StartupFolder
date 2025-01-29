@@ -561,9 +561,9 @@ class StartupItem: Identifiable, CustomStringConvertible {
             }
             process = shellProc("/usr/bin/shortcuts", args: ["run", shortcut.identifier ?! shortcut.name])
         } else if type == .script, !url.isExecutable(), let scriptRunner = ScriptRunner(fromExtension: ext) {
-            process = shellProc(scriptRunner.path, args: [path])
+            process = shellProc(scriptRunner.path, args: [path], env: SM.shellEnv)
         } else {
-            process = shellProc(path, args: [])
+            process = shellProc(path, args: [], env: SM.shellEnv)
         }
         guard let process else {
             status = .failed

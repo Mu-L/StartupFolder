@@ -31,6 +31,9 @@ extension StartupItem: Comparable, Equatable {
 class StartupManager {
     init() {
         startProcessCheckTimer()
+        asyncNow {
+            self.loadShellEnv()
+        }
     }
 
     var windowClosed = false
@@ -56,6 +59,8 @@ class StartupManager {
     var fetchProcessInfoWorkItems: [DispatchWorkItem] = []
 
     var processCheckTimer: Timer?
+
+    @ObservationIgnored var shellEnv: [String: String]? = nil
 
     var startupItems: [StartupItem] = [] {
         didSet {
@@ -260,6 +265,27 @@ class StartupManager {
                 item.status = .terminated
                 item.pid = nil
             }
+        }
+    }
+
+    private func loadShellEnv() {
+        guard let userShell = ProcessInfo.processInfo.environment["SHELL"] else {
+            log.error("SHELL environment variable not found")
+            return
+        }
+        guard let envOutput = shell(userShell, args: ["-l", "-c", "/usr/bin/printenv"]).o, envOutput.isNotEmpty else {
+            log.error("Failed to get environment variables from shell")
+            return
+        }
+        let env = envOutput.split(separator: "\n").reduce(into: [String: String]()) { dict, line in
+            let parts = line.split(separator: "=", maxSplits: 1)
+            if parts.count == 2 {
+                dict[String(parts[0])] = String(parts[1])
+            }
+        }
+
+        mainAsync {
+            self.shellEnv = env
         }
     }
 
