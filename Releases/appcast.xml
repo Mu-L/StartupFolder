@@ -3,6 +3,22 @@
     <channel>
         <title>StartupFolder</title>
         <item>
+            <title>1.1.2</title>
+            <pubDate>Thu, 30 Jan 2025 19:15:56 +0200</pubDate>
+            <link>https://lowtechguys.com/startupfolder</link>
+            <sparkle:fullReleaseNotesLink>https://github.com/FuzzyIdeas/StartupFolder/releases</sparkle:fullReleaseNotesLink>
+            <sparkle:version>1.1.2</sparkle:version>
+            <sparkle:shortVersionString>1.1.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://files.lowtechguys.com/ReleaseNotes/StartupFolder-1.1.2.html</sparkle:releaseNotesLink>
+            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.1.2.dmg" length="5145562" type="application/octet-stream" sparkle:edSignature="vtnPBrnqMNS+sQuTvZoBHr5UEbWWzEf52C/Ru8vEG6XBmY8ns0AsgQ2G9BPsaSNDdQ760Nh1i+X7hsTVRk5JBg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.2-1.1.1.delta" sparkle:deltaFrom="1.1.1" length="928186" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="g1Zy4tdlulwxtPCd3X/ooJyE3yD2qDpmU2YiFTP4mNESqnNiAYCuHzqjEC/yKISupK7HbYrYcoIjk0yT6wDuDg=="/>
+                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.2-1.1.delta" sparkle:deltaFrom="1.1" length="1153426" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="g8bRsyX3mJJHCdMpRR/LSvobnfxMFu3yXc1Z1clGkuDOyy0ouNlqB+4EcVOrOThrbZ6VOytsqgfTG0zvYHfXAA=="/>
+                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.2-1.delta" sparkle:deltaFrom="1" length="1209566" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="HifQHHTrnPacb3UamNB/Bp2Nxv0i1MeKp8gWUKmcM1zth3nwlGCBTCgQdqol78CRvPrFFElzpvDO1L3jH+ndCQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>1.1.1</title>
             <pubDate>Wed, 29 Jan 2025 18:41:36 +0200</pubDate>
             <link>https://lowtechguys.com/startupfolder</link>
