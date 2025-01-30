@@ -11,6 +11,11 @@
     </a>
 </p>
 
+### Installation
+
+- Download the app from the [website](https://lowtechguys.com/startupfolder) and drag it to your `Applications` folder
+- ...or `brew install --cask startupfolder`
+
 ### Run anything at startup
 
 The app creates a `Startup` folder in your home directory. Anything you place in this folder will run at startup automatically.
