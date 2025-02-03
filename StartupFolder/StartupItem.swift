@@ -535,6 +535,12 @@ class StartupItem: Identifiable, CustomStringConvertible {
             return
         }
 
+        guard url.filePath?.exists == true, url.resolvingAliasOrSymlink.filePath?.exists == true else {
+            log.error("File does not exist: \(url)")
+            SM.startupItems.removeAll { $0.id == id }
+            return
+        }
+
         if Defaults[.keepAlive][bundleIdentifier ?? path] == true {
             log.info("Restarting \(name) in 3 seconds due to keep alive setting.")
             mainAsyncAfter(3) { [weak self] in
