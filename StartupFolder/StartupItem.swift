@@ -301,6 +301,16 @@ class StartupItem: Identifiable, CustomStringConvertible {
         app = nil
     }
 
+    func hasRunningApp() -> Bool {
+        getRunningApp() != nil
+    }
+    func getRunningApp() -> NSRunningApplication? {
+        guard let bundleID = bundleIdentifier else {
+            return nil
+        }
+        return NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first
+    }
+
     func fetchProcessInfo(url: URL, type: StartupItemType) {
         switch type {
         case .app:
@@ -554,10 +564,12 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
         let config = NSWorkspace.OpenConfiguration()
         if let id = bundleIdentifier {
+            log.warning("No bundle ID for \(path), cannot launch app as hidden")
             config.activates = Defaults[.hideAppOnLaunch][id] != true
             config.hides = Defaults[.hideAppOnLaunch][id] == true
         }
 
+        log.info("Launching app \(path) with config \(config)")
         NSWorkspace.shared.openApplication(at: url, configuration: config) { app, error in
             mainAsync {
                 if let error {
@@ -575,7 +587,10 @@ class StartupItem: Identifiable, CustomStringConvertible {
                 self.endTime = app.isTerminated ? Date() : nil
                 self.app = app
 
-                guard let bundleID = self.bundleIdentifier else { return }
+                guard let bundleID = self.bundleIdentifier else {
+                    log.warning("No bundle ID for \(self.path), cannot hide app")
+                    return
+                }
                 if Defaults[.hideAppOnLaunch][bundleID] == true {
                     app.hide()
                     mainAsyncAfter(1) { app.hide() }

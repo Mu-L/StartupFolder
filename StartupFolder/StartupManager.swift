@@ -239,6 +239,23 @@ class StartupManager {
             return
         }
 
+        for appItem in startupItems.filter({ $0.type == .app }) {
+            guard let id = appItem.bundleIdentifier, let app = appItem.getRunningApp() else {
+                continue
+            }
+
+            log.debug("Found already running app, not launching: \(app)")
+            appItem.app = app
+            appItem.startTime = app.launchDate
+            appItem.status = app.isTerminated ? .succeeded : .running
+            if Defaults[.hideAppOnLaunch][id] == true {
+                log.debug("Hiding already running app: \(app)")
+                app.hide()
+            }
+
+        }
+
+        let startupItems = startupItems.filter { !$0.hasRunningApp() }
         let count = startupItems.count
         for (index, item) in startupItems.sorted().enumerated() {
             let workItem = mainAsyncAfter(delayBetweenItems * index.d) {
