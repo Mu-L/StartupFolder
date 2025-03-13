@@ -148,10 +148,8 @@ class AppDelegate: LowtechIndieAppDelegate {
     func handleURLs(_ application: NSApplication, _ urls: [URL]) async {
         for url in urls {
             do {
-                for url in urls {
-                    if url.pathExtension == "link", let fileURL = try (String(contentsOf: url)).url {
-                        NSWorkspace.shared.open(fileURL)
-                    }
+                if url.pathExtension == "link", let fileURL = try (String(contentsOf: url)).url {
+                    NSWorkspace.shared.open(fileURL)
                 }
             } catch {
                 log.error("Failed to open URL \(url): \(error)")

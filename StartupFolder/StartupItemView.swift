@@ -209,8 +209,6 @@ struct StartupItemView: View {
         }
     }
 
-    @Environment(\.colorScheme) var colorScheme
-
     func outputView(_ text: String, path: FilePath?) -> some View {
         VStack(spacing: 5) {
             HStack {

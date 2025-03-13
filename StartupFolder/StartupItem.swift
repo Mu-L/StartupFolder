@@ -184,7 +184,7 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
     var launching = false
 
-    @ObservationIgnored lazy var bundleIdentifier: String? = app?.bundleIdentifier ?? Bundle(url: url)?.bundleIdentifier
+    @ObservationIgnored lazy var bundleIdentifier: String? = app?.bundleIdentifier ?? Bundle(url: url.resolvingAliasOrSymlink)?.bundleIdentifier
     @ObservationIgnored lazy var path: String = url.path
     @ObservationIgnored lazy var ext: String = url.pathExtension
     @ObservationIgnored lazy var id = "\(path)-\(type)"
