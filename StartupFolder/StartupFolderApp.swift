@@ -152,11 +152,11 @@ class AppDelegate: LowtechIndieAppDelegate {
                 }
             } catch {
                 log.error("Failed to open URL \(url): \(error)")
-                await application.reply(toOpenOrPrint: .failure)
+                application.reply(toOpenOrPrint: .failure)
                 return
             }
         }
-        await application.reply(toOpenOrPrint: .success)
+        application.reply(toOpenOrPrint: .success)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

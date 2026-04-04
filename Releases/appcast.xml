@@ -3,6 +3,20 @@
     <channel>
         <title>StartupFolder</title>
         <item>
+            <title>1.2.0</title>
+            <pubDate>Sat, 04 Apr 2026 13:37:42 +0300</pubDate>
+            <link>https://lowtechguys.com/startupfolder</link>
+            <sparkle:fullReleaseNotesLink>https://github.com/FuzzyIdeas/StartupFolder/releases</sparkle:fullReleaseNotesLink>
+            <sparkle:version>1.2.0</sparkle:version>
+            <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:releaseNotesLink>https://files.lowtechguys.com/ReleaseNotes/StartupFolder-1.2.0.html</sparkle:releaseNotesLink>
+            <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.2.0.dmg" length="8361026" type="application/octet-stream" sparkle:edSignature="0UiYEFiEoZMavFIk08M9oiFmyDEm9qGPGRAJCNTZieeHi0X96y+79QbxrcpOa91Bop85+QFGX4MoHND2p4sDCQ=="/>
+            <sparkle:deltas>
+                <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.2.0-1.1.5.delta" sparkle:deltaFrom="1.1.5" length="5048834" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="zY5HN34ZkpMB57IksTiz5QybyF1154e4WjTG7JnmLBAjG/4HNogOvw1Vz09o8xg3XcKA3UMYLarqRdUqN9zpBQ=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>1.1.5</title>
             <pubDate>Thu, 13 Mar 2025 14:23:15 +0200</pubDate>
             <link>https://lowtechguys.com/startupfolder</link>
@@ -83,6 +97,7 @@
                 <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.1-1.1.delta" sparkle:deltaFrom="1.1" length="222178" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="0dggeEfVOxnz3z6dV5lLtyLWrpV4zjiAyqoSUMTDkGgLJRBF3ejTigLQhNxWyEoTH2TP1XjUrMlz3wety9jmDA=="/>
                 <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1.1-1.delta" sparkle:deltaFrom="1" length="276458" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="TySMoRHqM5ZdNI1FcxZxKcUiI9gqSlGR1X7RqKIYu/WlaQmK8OXx4eJZM+qFBLjTFmP2bSor6au2WxZHndgIDg=="/>
             </sparkle:deltas>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
         </item>
         <item>
             <title>1.1</title>
@@ -97,6 +112,7 @@
             <sparkle:deltas>
                 <enclosure url="https://files.lowtechguys.com/releases/StartupFolder1.1-1.delta" sparkle:deltaFrom="1" length="251274" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="864784" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,en" sparkle:edSignature="VoARkvh3NcE79mlQrtZUPbHAc6qdm/ALFZZHPoxOWyjym0CF3fshY62GTlJbkEpBjhSToUl3xHVS3ZyZD1sLCA=="/>
             </sparkle:deltas>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
         </item>
         <item>
             <title>1.0</title>
@@ -108,6 +124,7 @@
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:releaseNotesLink>https://files.lowtechguys.com/ReleaseNotes/StartupFolder-1.0.html</sparkle:releaseNotesLink>
             <enclosure url="https://files.lowtechguys.com/releases/StartupFolder-1.0.dmg" length="3763038" type="application/octet-stream" sparkle:edSignature="8ss/66yiGYgc49gvLDmb3pbbPZ+3ky8iiXujPeNLy8NWqwK3OjAPznVlaLoKjNxpTrCTMp2WiL8uw0/AcuIqAA=="/>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
         </item>
     </channel>
 </rss>

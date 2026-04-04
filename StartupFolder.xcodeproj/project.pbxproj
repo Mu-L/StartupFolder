@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C7D692432F8122DE00FAFD3A /* startupfolder.icon in Resources */ = {isa = PBXBuildFile; fileRef = C7D692422F8122DE00FAFD3A /* startupfolder.icon */; };
 		C7DA8FC22D450B750004A4D7 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = C7DA8FC12D450B750004A4D7 /* WrappingHStack */; };
 		C7E7FC452D467CA600EE431E /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = C7E7FC442D467CA600EE431E /* FaviconFinder */; };
 		C7F164E92D39516100966B49 /* Lowtech in Frameworks */ = {isa = PBXBuildFile; productRef = C7F164E82D39516100966B49 /* Lowtech */; };
@@ -26,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C7D692422F8122DE00FAFD3A /* startupfolder.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = startupfolder.icon; sourceTree = "<group>"; };
 		C7F164D52D3950FB00966B49 /* StartupFolder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StartupFolder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -87,6 +89,7 @@
 		C7F164CC2D3950FB00966B49 = {
 			isa = PBXGroup;
 			children = (
+				C7D692422F8122DE00FAFD3A /* startupfolder.icon */,
 				C7F164D72D3950FB00966B49 /* StartupFolder */,
 				C7DA8FC02D450B750004A4D7 /* Frameworks */,
 				C7F164D62D3950FB00966B49 /* Products */,
@@ -176,6 +179,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7D692432F8122DE00FAFD3A /* startupfolder.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,7 +317,7 @@
 		C7F164E52D3950FC00966B49 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = startupfolder;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = StartupFolder/StartupFolder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -344,7 +348,7 @@
 		C7F164E62D3950FC00966B49 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = startupfolder;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = StartupFolder/StartupFolder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
