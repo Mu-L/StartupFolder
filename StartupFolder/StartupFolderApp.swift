@@ -8,7 +8,6 @@
 import AppKit
 import Combine
 import Defaults
-import EonilFSEvents
 import Lowtech
 import LowtechIndie
 import ServiceManagement

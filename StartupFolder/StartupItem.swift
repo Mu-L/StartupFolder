@@ -408,6 +408,13 @@ class StartupItem: Identifiable, CustomStringConvertible {
             return
         }
 
+        let resolved = url.resolvingAliasOrSymlink
+        if resolved != url, !FileManager.default.fileExists(atPath: resolved.path) {
+            log.error("Cannot launch \(name): symlink target does not exist at \(resolved.path)")
+            status = .failed
+            return
+        }
+
         launching = true
         defer { launching = false }
 
@@ -545,7 +552,9 @@ class StartupItem: Identifiable, CustomStringConvertible {
             return
         }
 
-        guard url.filePath?.exists == true, url.resolvingAliasOrSymlink.filePath?.exists == true else {
+        guard FileManager.default.fileExists(atPath: url.path),
+              FileManager.default.fileExists(atPath: url.resolvingAliasOrSymlink.path)
+        else {
             log.error("File does not exist: \(url)")
             SM.startupItems.removeAll { $0.id == id }
             return

@@ -33,7 +33,7 @@ struct SidebarView: View {
                     }.tag(status as StartupItem.ExecutionStatus?)
                 }
             }
-            .frame(maxHeight: 180)
+            .frame(maxHeight: 210)
             .listStyle(.sidebar)
             .onChange(of: selectedStatuses) {
                 startupManager.filteredStartupItems = (selectedStatuses.isEmpty && selectedFolders.isEmpty && selectedTypes.isEmpty) ? nil : filteredItems
@@ -52,7 +52,7 @@ struct SidebarView: View {
                     }.tag(type as StartupItem.StartupItemType?)
                 }
             }
-            .frame(maxHeight: 210)
+            .frame(maxHeight: 240)
             .listStyle(.sidebar)
             .onChange(of: selectedTypes) {
                 startupManager.filteredStartupItems = (selectedStatuses.isEmpty && selectedFolders.isEmpty && selectedTypes.isEmpty) ? nil : filteredItems

@@ -13,6 +13,9 @@ struct StartupItemView: View {
     @State var hoveringSettings = false
 
     @Default(.hideAppOnLaunch) var hideAppOnLaunch: [String: Bool]
+    @Default(.keepAlive) var keepAlive: [String: Bool]
+    @Default(.keepAliveMode) var keepAliveMode: [String: KeepAliveMode]
+
     var hideOnLaunch: Binding<Bool> {
         Binding {
             item.bundleIdentifier.map { id in hideAppOnLaunch[id] ?? false } ?? false
@@ -22,7 +25,6 @@ struct StartupItemView: View {
         }
     }
 
-    @Default(.keepAlive) var keepAlive: [String: Bool]
     var keepAliveBinding: Binding<Bool> {
         Binding {
             keepAlive[item.bundleIdentifier ?? item.path] ?? false
@@ -30,7 +32,6 @@ struct StartupItemView: View {
             keepAlive[item.bundleIdentifier ?? item.path] = $0
         }
     }
-    @Default(.keepAliveMode) var keepAliveMode: [String: KeepAliveMode]
     var keepAliveModeBinding: Binding<KeepAliveMode> {
         Binding {
             keepAliveMode[item.bundleIdentifier ?? item.path] ?? .onFail
@@ -209,40 +210,6 @@ struct StartupItemView: View {
         }
     }
 
-    func outputView(_ text: String, path: FilePath?) -> some View {
-        VStack(spacing: 5) {
-            HStack {
-                Button(action: {
-                    showStdout = false
-                    showStderr = false
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.heavy(7))
-                        .foregroundColor(.bg.warm)
-                }
-                .buttonStyle(FlatButton(color: .fg.warm.opacity(0.6), circle: true, horizontalPadding: 5, verticalPadding: 5))
-                .padding(.top, 8).padding(.leading, 8)
-                Spacer()
-            }
-            ScrollView {
-                VStack {
-                    Text(text)
-                        .lineLimit(nil)
-                        .multilineTextAlignment(.leading)
-                        .monospaced()
-                        .fill(.topLeading)
-                }.frame(maxWidth: .infinity)
-            }
-            .padding(.bottom).padding(.horizontal, 25)
-            if let path {
-                Button("Open in editor") {
-                    NSWorkspace.shared.open([path.url], withApplicationAt: Defaults[.editorApp], configuration: .init())
-                }
-                .padding(4)
-            }
-        }.frame(width: 600, height: 300, alignment: .topLeading)
-    }
-
     var trashedActions: some View {
         HStack {
             Button {
@@ -328,6 +295,40 @@ struct StartupItemView: View {
                 .disabled(errSize <= 0)
             }
         }
+    }
+
+    func outputView(_ text: String, path: FilePath?) -> some View {
+        VStack(spacing: 5) {
+            HStack {
+                Button(action: {
+                    showStdout = false
+                    showStderr = false
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.heavy(7))
+                        .foregroundColor(.bg.warm)
+                }
+                .buttonStyle(FlatButton(color: .fg.warm.opacity(0.6), circle: true, horizontalPadding: 5, verticalPadding: 5))
+                .padding(.top, 8).padding(.leading, 8)
+                Spacer()
+            }
+            ScrollView {
+                VStack {
+                    Text(text)
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.leading)
+                        .monospaced()
+                        .fill(.topLeading)
+                }.frame(maxWidth: .infinity)
+            }
+            .padding(.bottom).padding(.horizontal, 25)
+            if let path {
+                Button("Open in editor") {
+                    NSWorkspace.shared.open([path.url], withApplicationAt: Defaults[.editorApp], configuration: .init())
+                }
+                .padding(4)
+            }
+        }.frame(width: 600, height: 300, alignment: .topLeading)
     }
 
     func durationText(endDate: Date? = nil) -> String? {

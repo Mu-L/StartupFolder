@@ -154,6 +154,12 @@ class StartupManager {
                 continue
             }
 
+            let resolved = file.resolvingAliasOrSymlink
+            if resolved != file, !FileManager.default.fileExists(atPath: resolved.path) {
+                log.warning("Skipping broken symlink/alias: \(file.path) -> \(resolved.path)")
+                continue
+            }
+
             log.debug("Adding item at \(file.path)")
             var folder: FilePath.ComponentView?
             if let startupPathComponents, let path = file.filePath {

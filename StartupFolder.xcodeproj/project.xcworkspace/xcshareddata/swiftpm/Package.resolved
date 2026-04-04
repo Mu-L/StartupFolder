@@ -42,17 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/will-lumley/FaviconFinder",
       "state" : {
-        "revision" : "9279f4371f4877ca302ba3bf1015f3f58ae4a56c",
-        "version" : "5.1.4"
-      }
-    },
-    {
-      "identity" : "fsevents",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/eonil/FSEvents",
-      "state" : {
-        "revision" : "e6b7cdfa2754454e194a45ee6c2004d0f630fe88",
-        "version" : "0.1.7"
+        "revision" : "11c2b27fbdc5fdfe0bf3addac01d27c40299a819",
+        "version" : "5.1.5"
       }
     },
     {
@@ -70,7 +61,7 @@
       "location" : "https://github.com/FuzzyIdeas/Lowtech",
       "state" : {
         "branch" : "ventura",
-        "revision" : "ed4daf46d478cea6c39623c380fdec646bad3183"
+        "revision" : "7b911a7fe2496d7a18d1dc34f7d2288ff583dd9e"
       }
     },
     {
@@ -105,17 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "f45e9c62d7a4d9258ac3cf35a3acf9dbab4481d1",
-        "version" : "8.43.0"
-      }
-    },
-    {
-      "identity" : "setapp-framework",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/MacPaw/Setapp-framework",
-      "state" : {
-        "revision" : "325aba75c006be6726420907eeb242a35f180e91",
-        "version" : "4.2.2"
+        "revision" : "d459ff99b1912c9603c9e607e030b4b98e2e199a",
+        "version" : "9.9.0"
       }
     },
     {
@@ -123,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sparkle-project/Sparkle",
       "state" : {
-        "revision" : "0ef1ee0220239b3776f433314515fd849025673f",
-        "version" : "2.6.4"
+        "revision" : "066e75a8b3e99962685d6a90cdd5293ebffd9261",
+        "version" : "2.9.1"
       }
     },
     {
@@ -132,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-atomics",
       "state" : {
-        "revision" : "cd142fd2f64be2100422d658e7411e39489da985",
-        "version" : "1.2.0"
+        "revision" : "b601256eab081c0f92f059e12818ac1d4f178ff7",
+        "version" : "1.3.0"
       }
     },
     {
@@ -159,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup.git",
       "state" : {
-        "revision" : "6b4930da67b462d3f200472c902dd016d37a554d",
-        "version" : "2.7.7"
+        "revision" : "6c7915e16f729857aec3e99068c361e58a00ed68",
+        "version" : "2.13.4"
       }
     },
     {
