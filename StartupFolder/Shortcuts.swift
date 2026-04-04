@@ -154,11 +154,12 @@ func getShortcuts(folder: String? = nil) -> [Shortcut]? {
     let lines = output.split(separator: "\n")
     var shortcuts: [Shortcut] = []
     for line in lines {
-        let parts = line.split(separator: " ")
-        guard let identifier = parts.last?.trimmingCharacters(in: CharacterSet(charactersIn: "()")) else {
-            continue
-        }
-        let name = parts.dropLast().joined(separator: " ")
+        let str = String(line)
+        guard let openParen = str.lastIndex(of: "("),
+              let closeParen = str.lastIndex(of: ")") else { continue }
+        let identifier = String(str[str.index(after: openParen) ..< closeParen])
+        let name = String(str[str.startIndex ..< openParen]).trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty, !identifier.isEmpty else { continue }
         shortcuts.append(Shortcut(name: name, identifier: identifier))
     }
 
@@ -197,7 +198,9 @@ func startShortcutWatcher() {
     }
 
     do {
-        try LowtechFSEvents.startWatching(paths: ["\(HOME)/Library/Shortcuts"], for: ObjectIdentifier(AppDelegate.instance), latency: 0.9) { event in
+        let dbPath = "\(HOME)/Library/Shortcuts/Shortcuts.sqlite"
+        let walPath = "\(HOME)/Library/Shortcuts/Shortcuts.sqlite-wal"
+        try LowtechFSEvents.startWatching(paths: [dbPath, walPath], for: ObjectIdentifier(AppDelegate.instance), latency: 0.9) { event in
             guard !SWIFTUI_PREVIEW else { return }
 
             shortcutCacheResetTask = mainAsyncAfter(ms: 100) {
