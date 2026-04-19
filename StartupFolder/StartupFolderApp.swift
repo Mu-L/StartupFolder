@@ -66,7 +66,8 @@ class AppDelegate: LowtechIndieAppDelegate {
             focus()
         }
         if !SWIFTUI_PREVIEW {
-            startShortcutWatcher()
+            SHM.startWatching()
+            SHM.fetch()
         }
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(applicationDidTerminate(_:)), name: NSWorkspace.didTerminateApplicationNotification, object: nil)
         NSWorkspace.shared.addObserver(self, forKeyPath: #keyPath(NSWorkspace.runningApplications), options: [.new, .old, .prior], context: nil)

@@ -1,3 +1,4 @@
+import Lowtech
 import SwiftUI
 
 struct AddShortcutView: View {

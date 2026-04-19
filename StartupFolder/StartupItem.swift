@@ -573,7 +573,6 @@ class StartupItem: Identifiable, CustomStringConvertible {
 
         let config = NSWorkspace.OpenConfiguration()
         if let id = bundleIdentifier {
-            log.warning("No bundle ID for \(path), cannot launch app as hidden")
             config.activates = Defaults[.hideAppOnLaunch][id] != true
             config.hides = Defaults[.hideAppOnLaunch][id] == true
         }
@@ -600,7 +599,7 @@ class StartupItem: Identifiable, CustomStringConvertible {
                     log.warning("No bundle ID for \(self.path), cannot hide app")
                     return
                 }
-                if Defaults[.hideAppOnLaunch][bundleID] == true {
+                if Defaults[.hideAppOnLaunch][bundleID] == true, app.activationPolicy == .regular {
                     app.hide()
                     mainAsyncAfter(1) { app.hide() }
                     mainAsyncAfter(2) { app.hide() }
@@ -663,10 +662,10 @@ class StartupItem: Identifiable, CustomStringConvertible {
         }
 
         if let identifier, !identifier.isEmpty {
-            return SHM.shortcutsMap?.values.joined().first { $0.identifier == identifier }
+            return SHM.shortcuts.first { $0.identifier == identifier }
                 ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: identifier)
         } else {
-            return SHM.shortcutsMap?.values.joined().first { $0.name == url.deletingPathExtension().lastPathComponent }
+            return SHM.shortcuts.first { $0.name == url.deletingPathExtension().lastPathComponent }
                 ?? Shortcut(name: url.deletingPathExtension().lastPathComponent, identifier: "")
         }
     }
